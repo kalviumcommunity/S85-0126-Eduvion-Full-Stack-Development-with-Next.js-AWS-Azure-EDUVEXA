@@ -145,25 +145,4 @@ By working on EDUVEXA, developers gain hands-on experience with:
 
 EDUVEXA reflects how **real-world, production-ready full-stack applications** are built. It not only improves educational collaboration but also mirrors modern industry practices, preparing developers for professional full-stack roles.
 
-> *“You’re not just building an app — you’re learning how the modern web runs.”*
-
-
-## Code Quality & Tooling Setup
-
-### Strict TypeScript Configuration
-We enabled strict TypeScript settings to catch potential runtime bugs at compile time. This prevents:
-- Implicit `any` types
-- Unused variables or parameters
-- File name casing mismatches
-
-This ensures safer and more predictable code across the team.
-
-### ESLint + Prettier
-ESLint enforces coding best practices, while Prettier ensures consistent formatting. Key rules applied:
-- Warn on `console.log` usage
-- Enforce semicolons
-- Enforce double quotes
-- Integrate Prettier automatically via ESLint
-
-### Pre-Commit Hooks
-Husky + lint-staged run ESLint and Prettier automatically on staged files before every commit. This guarante
+> *“You’re not just building an app —  you’re learning how the modern web runs.”*
