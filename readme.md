@@ -145,4 +145,4 @@ By working on EDUVEXA, developers gain hands-on experience with:
 
 EDUVEXA reflects how **real-world, production-ready full-stack applications** are built. It not only improves educational collaboration but also mirrors modern industry practices, preparing developers for professional full-stack roles.
 
-> *“You’re not just building an app — you’re learning how the modern web runs.”*
+> *“You’re not just building an app —  you’re learning how the modern web runs.”*
