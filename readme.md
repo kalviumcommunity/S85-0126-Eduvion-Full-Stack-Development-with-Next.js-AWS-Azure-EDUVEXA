@@ -146,3 +146,39 @@ By working on EDUVEXA, developers gain hands-on experience with:
 EDUVEXA reflects how **real-world, production-ready full-stack applications** are built. It not only improves educational collaboration but also mirrors modern industry practices, preparing developers for professional full-stack roles.
 
 > *“You’re not just building an app —  you’re learning how the modern web runs.”*
+
+
+
+
+
+
+## 🔐 Environment Variable Management
+
+This project uses environment variables to manage sensitive configuration securely.
+
+### Environment Files
+- `.env.local` – Stores actual secrets and local credentials (never committed)
+- `.env.example` – Template showing required variables and their purpose
+
+### Variables Used
+
+#### Server-side only
+- `DATABASE_URL`
+  - PostgreSQL connection string
+  - Accessible only on the server
+
+#### Client-side safe
+- `NEXT_PUBLIC_API_BASE_URL`
+  - Base URL for API requests
+  - Safe to expose to the client
+
+### Setup Instructions
+1. Copy `.env.example` to `.env.local`
+2. Replace placeholder values with real credentials
+3. Restart the development server
+
+### Common Pitfalls Avoided
+- Never exposing secrets without `NEXT_PUBLIC_`
+- Preventing `.env.local` from being committed
+- Separating client and server variables clearly
+
