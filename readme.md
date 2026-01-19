@@ -182,3 +182,78 @@ This project uses environment variables to manage sensitive configuration secure
 - Preventing `.env.local` from being committed
 - Separating client and server variables clearly
 
+
+
+
+
+---
+
+## 🗄️ PostgreSQL Schema Design
+
+This project uses a normalized relational database schema designed to support scalability, data consistency, and efficient querying for dashboards and collaboration features.
+
+### Core Entities
+
+#### User
+- Represents a registered user (student or instructor)
+- Each user can own multiple projects
+
+**Key fields:**
+- `id` – Primary Key
+- `email` – Unique, prevents duplicate users
+- `role` – Defines user type (STUDENT, INSTRUCTOR)
+
+---
+
+#### Project
+- Represents an educational or collaborative project
+- Each project belongs to exactly one user
+- A project can have multiple tasks
+
+**Key fields:**
+- `id` – Primary Key
+- `ownerId` – Foreign Key referencing `User(id)`
+
+---
+
+#### Task
+- Represents an individual task within a project
+- Each task belongs to one project
+
+**Key fields:**
+- `id` – Primary Key
+- `projectId` – Foreign Key referencing `Project(id)`
+- `status` – Enum (`PENDING`, `IN_PROGRESS`, `COMPLETED`)
+
+---
+
+### Relationships
+- One **User → Many Projects**
+- One **Project → Many Tasks**
+- Foreign keys enforce referential integrity
+- Cascading deletes ensure related data is cleaned automatically
+
+---
+
+### Constraints & Indexes
+- Unique constraint on `User.email`
+- Enum used for `Task.status` to prevent invalid values
+- Indexes on frequently queried fields (`email`, `ownerId`, `projectId`, `status`) for faster dashboard queries
+
+---
+
+### Normalization
+- Schema follows **Third Normal Form (3NF)**
+- No duplicated data across tables
+- Each table has a single responsibility
+- Relationships are handled using foreign keys
+
+---
+
+### Why This Design Works
+- Supports scalable dashboards and analytics
+- Ensures data consistency and integrity
+- Optimized for common queries like:
+  - Fetching user projects
+  - Listing tasks by project or status
+  - Tracking project progress
