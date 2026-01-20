@@ -1,11 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Prisma schema file
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -13,16 +9,12 @@ datasource db {
   provider = "postgresql"
 }
 
-//
 enum TaskStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
 }
 
-
-
-//
 model User {
   id        Int       @id @default(autoincrement())
   name      String
@@ -34,7 +26,6 @@ model User {
 
   @@index([email])
 }
-
 
 model Project {
   id          Int       @id @default(autoincrement())
@@ -50,18 +41,15 @@ model Project {
   @@index([ownerId])
 }
 
-
 model Task {
-  id          Int       @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   status      TaskStatus @default(PENDING)
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime   @default(now())
 
   projectId   Int
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([status])
 }
-
-
