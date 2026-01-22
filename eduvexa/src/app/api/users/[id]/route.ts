@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 // GET /api/users/:id
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const userId = Number(params.id);
+  const { id } = await params;
+  const userId = Number(id);
 
   if (isNaN(userId)) {
     return NextResponse.json(
@@ -30,10 +31,11 @@ export async function GET(
 
 // PUT /api/users/:id
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const userId = Number(params.id);
+  const { id } = await params;
+  const userId = Number(id);
   const body = await req.json();
 
   if (!body.name) {
@@ -51,10 +53,11 @@ export async function PUT(
 
 // DELETE /api/users/:id
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const userId = Number(params.id);
+  const { id } = await params;
+  const userId = Number(id);
 
   return NextResponse.json(
     { message: "User deleted", id: userId },
