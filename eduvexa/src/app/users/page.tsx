@@ -19,23 +19,23 @@ export default function UsersPage() {
     },
     { 
       id: 2, 
-      name: "Aman", 
+      name: "Aman Rohilla", 
       role: "Backend Developer", 
       email: "aman@example.com", 
       status: "active",
       tasksCompleted: 52,
       hoursThisWeek: 40,
-      avatar: "A"
+      avatar: "AR"
     },
     { 
       id: 3, 
-      name: "Nikhil", 
+      name: "Nikhil Farand", 
       role: "DevOps", 
       email: "nikhil@example.com", 
       status: "active",
       tasksCompleted: 38,
       hoursThisWeek: 35,
-      avatar: "N"
+      avatar: "NF"
     },
     { 
       id: 4, 
