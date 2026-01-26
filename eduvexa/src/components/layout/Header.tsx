@@ -1,11 +1,44 @@
 
  "use client";
 import React, { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { useUI } from "../../hooks/useUI";
 import Link from "next/link";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const auth = useAuth();
+  const ui = useUI();
+
+  // Apply theme to body
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const body = document.body;
+      if (ui.theme === "dark") {
+        body.classList.add("dark");
+      } else {
+        body.classList.remove("dark");
+      }
+    }
+  }, [ui.theme]);
+
+  // Close profile card on outside click
+  React.useEffect(() => {
+    function handleProfileClick(e: MouseEvent) {
+      const profileCard = document.getElementById("profile-card-dropdown");
+      if (profileCard && !profileCard.contains(e.target as Node)) {
+        setShowProfile(false);
+      }
+    }
+    if (showProfile) {
+      document.addEventListener("mousedown", handleProfileClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleProfileClick);
+    };
+  }, [showProfile]);
 
   // Close notifications dropdown on outside click
   React.useEffect(() => {
@@ -24,7 +57,7 @@ export default function Header() {
   }, [showNotifications]);
 
   return (
-    <header className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
+    <header className="w-full bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           {/* Logo and Brand */}
@@ -39,25 +72,23 @@ export default function Header() {
               <p className="text-xs text-purple-100">Work Tracker</p>
             </div>
           </Link>
-
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation & User Actions */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-white hover:text-purple-200 transition-colors font-medium">
-              Home
-            </Link>
-            <Link href="/dashboard" className="text-white hover:text-purple-200 transition-colors font-medium">
-              Dashboard
-            </Link>
-            <Link href="/users" className="text-white hover:text-purple-200 transition-colors font-medium">
-              Team Members
-            </Link>
-            <Link href="/profile" className="text-white hover:text-purple-200 transition-colors font-medium">
-              Profile
-            </Link>
+            <Link href="/" className="text-white hover:text-purple-200 transition-colors font-medium">Home</Link>
+            <Link href="/dashboard" className="text-white hover:text-purple-200 transition-colors font-medium">Dashboard</Link>
+            <Link href="/users" className="text-white hover:text-purple-200 transition-colors font-medium">Team Members</Link>
+            <Link href="/profile" className="text-white hover:text-purple-200 transition-colors font-medium">Profile</Link>
           </nav>
-
-          {/* User Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Theme Toggle Button (Right side) */}
+            <button
+              className="ml-2 px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors"
+              onClick={ui.toggleTheme}
+              aria-label="Toggle theme"
+            >
+              {ui.theme === 'light' ? '🌞 Light' : '🌙 Dark'}
+            </button>
+            {/* Notification Bell */}
             <div className="relative">
               <button
                 className="relative p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -93,9 +124,52 @@ export default function Header() {
                 </div>
               )}
             </div>
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-              <span className="font-semibold">SS</span>
-            </div>
+            {/* Auth State UI */}
+            {auth.isLoggedIn ? (
+              <>
+                <div className="relative">
+                  <button
+                    className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
+                    onClick={() => setShowProfile((v) => !v)}
+                    aria-label="Show profile"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.485 0 4.797.73 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                  {showProfile && (
+                    <div id="profile-card-dropdown" className="absolute right-0 mt-2 w-80 bg-white text-gray-900 rounded-xl shadow-2xl border border-purple-100 z-50 animate-fade-in">
+                      <div className="flex flex-col items-center p-6">
+                        <div className="w-16 h-16 rounded-full bg-linear-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold mb-2">
+                          {auth.userName ? auth.userName[0].toUpperCase() : "U"}
+                        </div>
+                        <h2 className="text-xl font-bold text-indigo-700 mb-1">{auth.userName}</h2>
+                        <p className="text-sm text-gray-500 mb-4">Role: Developer</p>
+                        <div className="grid grid-cols-2 gap-4 w-full mb-4">
+                          <div className="bg-purple-50 rounded-lg p-3 text-center">
+                            <div className="text-xs text-gray-400">User ID</div>
+                            <div className="font-semibold text-purple-700">#123456</div>
+                          </div>
+                          <div className="bg-pink-50 rounded-lg p-3 text-center">
+                            <div className="text-xs text-gray-400">Age</div>
+                            <div className="font-semibold text-pink-700">25</div>
+                          </div>
+                        </div>
+                        <button
+                          className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
+                          onClick={() => { auth.logout(); setShowProfile(false); }}
+                        >Logout</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors">Login</Link>
+                <Link href="/signup" className="px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors">Signup</Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,18 +191,33 @@ export default function Header() {
         {isMenuOpen && (
           <nav className="md:hidden mt-4 pt-4 border-t border-white/20">
             <div className="flex flex-col space-y-3">
-              <Link href="/" className="text-white hover:text-purple-200 transition-colors font-medium py-2">
-                Home
-              </Link>
-              <Link href="/dashboard" className="text-white hover:text-purple-200 transition-colors font-medium py-2">
-                Dashboard
-              </Link>
-              <Link href="/users" className="text-white hover:text-purple-200 transition-colors font-medium py-2">
-                Team Members
-              </Link>
-              <Link href="/profile" className="text-white hover:text-purple-200 transition-colors font-medium py-2">
-                Profile
-              </Link>
+              <Link href="/" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Home</Link>
+              <Link href="/dashboard" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Dashboard</Link>
+              <Link href="/users" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Team Members</Link>
+              <Link href="/profile" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Profile</Link>
+              {/* Theme Toggle Button (Mobile) */}
+              <button
+                className="mt-2 px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors"
+                onClick={ui.toggleTheme}
+                aria-label="Toggle theme"
+              >
+                {ui.theme === 'light' ? '🌞 Light' : '🌙 Dark'}
+              </button>
+              {/* Auth State UI (Mobile) */}
+              {auth.isLoggedIn ? (
+                <>
+                  <span className="font-semibold">Hello, {auth.userName}</span>
+                  <button
+                    className="mt-2 px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors"
+                    onClick={auth.logout}
+                  >Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="mt-2 px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors">Login</Link>
+                  <Link href="/signup" className="mt-2 px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors">Signup</Link>
+                </>
+              )}
             </div>
           </nav>
         )}
