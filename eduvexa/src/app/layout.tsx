@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LayoutWrapper } from "@/components";
+import { AuthProvider } from "../context/AuthContext";
+import { UIProvider } from "../context/UIContext";
+import ThemedBody from "./themed-body";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -10,6 +13,9 @@ export const metadata: Metadata = {
   description: "Professional work tracking and team management system",
 };
 
+
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,9 +23,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <LayoutWrapper>{children}</LayoutWrapper>
-      </body>
+      <AuthProvider>
+        <UIProvider>
+          <ThemedBody>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </ThemedBody>
+        </UIProvider>
+      </AuthProvider>
     </html>
   );
 }
