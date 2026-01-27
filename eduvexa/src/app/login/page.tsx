@@ -47,10 +47,20 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      console.log("Login form data:", data);
-      login(data.userName.trim());
-      router.push("/");
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        login(result.user.name);
+        router.push("/");
+      } else {
+        alert(result.message || "Login failed");
+      }
     } catch (error) {
+      alert("Login failed. Please try again later.");
       console.error("Login failed:", error);
     }
   };

@@ -30,10 +30,20 @@ export default function SignupPage() {
 
   const onSubmit = async (data: SignupFormData) => {
     try {
-      console.log("Form Submitted:", data);
-      login(data.name.trim());
-      router.push("/");
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        login(data.name.trim());
+        router.push("/");
+      } else {
+        alert(result.message || "Signup failed");
+      }
     } catch (error) {
+      alert("Signup failed. Please try again later.");
       console.error("Signup failed:", error);
     }
   };
