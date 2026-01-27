@@ -1,7 +1,5 @@
-// Prisma schema file
-
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "library"
 }
 
@@ -16,13 +14,20 @@ enum TaskStatus {
   COMPLETED
 }
 
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
 model User {
   id        Int       @id @default(autoincrement())
   name      String
   email     String    @unique
-  role      String    @default("STUDENT")
-  bio       String? 
-  createdAt DateTime  @default(now())
+  password  String   // ✅ REQUIRED for signup/login
+  role      UserRole @default(STUDENT)
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   projects  Project[]
 
@@ -44,13 +49,13 @@ model Project {
 }
 
 model Task {
-  id          Int        @id @default(autoincrement())
-  title       String
-  status      TaskStatus @default(PENDING)
-  createdAt   DateTime   @default(now())
+  id        Int        @id @default(autoincrement())
+  title     String
+  status    TaskStatus @default(PENDING)
+  createdAt DateTime   @default(now())
 
-  projectId   Int
-  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId Int
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([status])
