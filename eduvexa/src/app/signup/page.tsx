@@ -1,41 +1,146 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../../hooks/useAuth";
+import FormInput from "../../components/ui/FormInput";
+import Button from "../../components/ui/Button";
+import Card from "../../components/ui/Card";
+
+const signupSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters long"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
+
+type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
-  const [userName, setUserName] = useState("");
-  const [error, setError] = useState("");
   const { login } = useAuth();
   const router = useRouter();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userName.trim()) {
-      setError("Please enter your name.");
-      return;
+  const onSubmit = async (data: SignupFormData) => {
+    try {
+      console.log("Form Submitted:", data);
+      login(data.name.trim());
+      router.push("/");
+    } catch (error) {
+      console.error("Signup failed:", error);
     }
-    login(userName.trim());
-    router.push("/");
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-purple-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-pink-700">Sign Up</h2>
-        <input
-          type="text"
-          placeholder="Enter your name"
-          value={userName}
-          onChange={e => setUserName(e.target.value)}
-          className="w-full px-4 py-2 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-        />
-        {error && <div className="text-red-500 mb-2 text-sm">{error}</div>}
-        <button type="submit" className="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 transition">Sign Up</button>
-        <div className="mt-4 text-center text-sm">
-          Already have an account? <a href="/login" className="text-pink-600 hover:underline">Login</a>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-6 shadow-lg">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">EDUVEXA</h1>
+          <p className="text-lg text-gray-600">Work Tracker System</p>
+          <p className="text-gray-500 mt-2">Create your account to get started</p>
         </div>
-      </form>
+
+        <Card variant="gradient" className="shadow-xl">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <FormInput
+              label="Full Name"
+              type="text"
+              placeholder="Enter your full name"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              }
+              {...register("name")}
+              error={errors.name?.message}
+              required
+            />
+
+            <FormInput
+              label="Email Address"
+              type="email"
+              placeholder="Enter your email"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              }
+              {...register("email")}
+              error={errors.email?.message}
+              required
+            />
+
+            <FormInput
+              label="Password"
+              type="password"
+              placeholder="Create a password"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              }
+              {...register("password")}
+              error={errors.password?.message}
+              required
+            />
+
+            <div className="w-full">
+              <Button
+                type="submit"
+                label={isSubmitting ? "Creating account..." : "Create Account"}
+                disabled={isSubmitting}
+                variant="success"
+                size="lg"
+                icon={
+                  isSubmitting ? (
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  )
+                }
+              />
+            </div>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{" "}
+              <a 
+                href="/login" 
+                className="font-medium text-purple-600 hover:text-purple-700 transition-colors"
+              >
+                Sign in instead
+              </a>
+            </p>
+          </div>
+        </Card>
+
+        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-500">
+            By creating an account, you agree to our{" "}
+            <a href="#" className="text-purple-600 hover:underline">Terms of Service</a>{" "}
+            and{" "}
+            <a href="#" className="text-purple-600 hover:underline">Privacy Policy</a>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
