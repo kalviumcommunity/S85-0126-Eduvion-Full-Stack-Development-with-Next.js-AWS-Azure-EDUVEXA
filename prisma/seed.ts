@@ -6,9 +6,9 @@ async function main() {
   // 1️⃣ Seed Users (safe to run multiple times)
   await prisma.user.createMany({
     data: [
-      { name: 'Alice', email: 'alice@example.com' },
-      { name: 'Bob', email: 'bob@example.com' },
-      { name: 'Aman', email: 'aman@gmail.com' },
+      { name: 'Alice', email: 'alice@example.com',password:'ali@123' },
+      { name: 'Bob', email: 'bob@example.com',password:'ali@123' },
+      { name: 'Aman', email: 'aman@gmail.com',password:'ali@123' },
     ],
     skipDuplicates: true,
   });

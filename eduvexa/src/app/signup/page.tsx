@@ -1,4 +1,3 @@
-
 "use client";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -12,68 +11,51 @@ import Modal from "../../components/ui/Modal";
 import { toast } from "../../components/ui/ToastProvider";
 import { useState } from "react";
 
-const loginSchema = z.object({
-  userName: z
-    .string()
-    .min(2, "Name must be at least 2 characters long")
-    .max(50, "Name cannot exceed 50 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
-    .trim()
-    .refine((val) => val.trim().length > 0, "Name cannot be empty or just whitespace"),
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Invalid email address")
-    .max(100, "Email cannot exceed 100 characters")
-    .toLowerCase()
-    .refine((val) => val.includes('.'), "Email must contain a domain"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .max(128, "Password cannot exceed 128 characters")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number")
-    .refine((val) => !val.includes(' '), "Password cannot contain spaces"),
+const signupSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters long"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type SignupFormData = z.infer<typeof signupSchema>;
 
-export default function LoginPage() {
+export default function SignupPage() {
   const { login } = useAuth();
   const router = useRouter();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingData, setPendingData] = useState<LoginFormData | null>(null);
+  const [pendingData, setPendingData] = useState<SignupFormData | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: SignupFormData) => {
     setPendingData(data);
     setShowConfirmModal(true);
   };
 
-  const handleConfirmLogin = async () => {
+  const handleConfirmSignup = async () => {
     if (!pendingData) return;
 
     try {
       // Show loading toast
-      const loadingToast = toast.loading("Signing in...", {
+      const loadingToast = toast.loading("Creating account...", {
         position: "top-right",
       });
 
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      console.log("Login form data:", pendingData);
-      login(pendingData.userName.trim());
+      console.log("Form Submitted:", pendingData);
+      login(pendingData.name.trim());
       
       // Dismiss loading toast and show success
       toast.dismiss(loadingToast);
-      toast.success(`Welcome back, ${pendingData.userName}!`, {
+      toast.success(`Account created successfully! Welcome, ${pendingData.name}!`, {
         position: "top-right",
       });
 
@@ -84,34 +66,34 @@ export default function LoginPage() {
       }, 1000);
 
     } catch (error) {
-      console.error("Login failed:", error);
-      toast.error("Login failed. Please try again.", {
+      console.error("Signup failed:", error);
+      toast.error("Account creation failed. Please try again.", {
         position: "top-right",
       });
     }
   };
 
-  const handleCancelLogin = () => {
+  const handleCancelSignup = () => {
     setShowConfirmModal(false);
     setPendingData(null);
-    toast("Login cancelled", {
+    toast("Account creation cancelled", {
       icon: "",
       position: "top-right",
     });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full mb-6 shadow-lg">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-6 shadow-lg">
             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">EDUVEXA</h1>
           <p className="text-lg text-gray-600">Work Tracker System</p>
-          <p className="text-gray-500 mt-2">Sign in to your account to continue</p>
+          <p className="text-gray-500 mt-2">Create your account to get started</p>
         </div>
 
         <Card variant="gradient" className="shadow-xl">
@@ -125,8 +107,8 @@ export default function LoginPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               }
-              {...register("userName")}
-              error={errors.userName?.message}
+              {...register("name")}
+              error={errors.name?.message}
               required
             />
 
@@ -147,7 +129,7 @@ export default function LoginPage() {
             <FormInput
               label="Password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="Create a password"
               icon={
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -161,9 +143,9 @@ export default function LoginPage() {
             <div className="w-full">
               <Button
                 type="submit"
-                label={isSubmitting ? "Processing..." : "Sign In"}
+                label={isSubmitting ? "Processing..." : "Create Account"}
                 disabled={isSubmitting}
-                variant="primary"
+                variant="success"
                 size="lg"
                 icon={
                   isSubmitting ? (
@@ -185,12 +167,12 @@ export default function LoginPage() {
 
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Already have an account?{" "}
               <a 
-                href="/signup" 
-                className="font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                href="/login" 
+                className="font-medium text-purple-600 hover:text-purple-700 transition-colors"
               >
-                Sign up for free
+                Sign in instead
               </a>
             </p>
           </div>
@@ -198,10 +180,10 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            By signing in, you agree to our{" "}
-            <a href="#" className="text-indigo-600 hover:underline">Terms of Service</a>{" "}
+            By creating an account, you agree to our{" "}
+            <a href="#" className="text-purple-600 hover:underline">Terms of Service</a>{" "}
             and{" "}
-            <a href="#" className="text-indigo-600 hover:underline">Privacy Policy</a>
+            <a href="#" className="text-purple-600 hover:underline">Privacy Policy</a>
           </p>
         </div>
       </div>
@@ -209,13 +191,13 @@ export default function LoginPage() {
       {/* Confirmation Modal */}
       <Modal
         isOpen={showConfirmModal}
-        onClose={handleCancelLogin}
-        title="Confirm Sign In"
+        onClose={handleCancelSignup}
+        title="Confirm Account Creation"
         size="sm"
       >
         <div className="space-y-4">
           <p className="text-gray-600">
-            Are you sure you want to sign in as <strong>{pendingData?.userName}</strong>?
+            Are you sure you want to create an account for <strong>{pendingData?.name}</strong>?
           </p>
           <div className="bg-gray-50 p-3 rounded-lg">
             <p className="text-sm text-gray-500">Email: {pendingData?.email}</p>
@@ -224,16 +206,16 @@ export default function LoginPage() {
             <div className="flex-1">
               <Button
                 label="Cancel"
-                onClick={handleCancelLogin}
+                onClick={handleCancelSignup}
                 variant="outline"
                 size="md"
               />
             </div>
             <div className="flex-1">
               <Button
-                label="Confirm Sign In"
-                onClick={handleConfirmLogin}
-                variant="primary"
+                label="Create Account"
+                onClick={handleConfirmSignup}
+                variant="success"
                 size="md"
               />
             </div>
