@@ -7,6 +7,9 @@ import { useAuth } from "../../hooks/useAuth";
 import FormInput from "../../components/ui/FormInput";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import Modal from "../../components/ui/Modal";
+import { toast } from "../../components/ui/ToastProvider";
+import { useState } from "react";
 
 const signupSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters long"),
@@ -19,7 +22,9 @@ type SignupFormData = z.infer<typeof signupSchema>;
 export default function SignupPage() {
   const { login } = useAuth();
   const router = useRouter();
-  
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingData, setPendingData] = useState<SignupFormData | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -29,23 +34,52 @@ export default function SignupPage() {
   });
 
   const onSubmit = async (data: SignupFormData) => {
+    setPendingData(data);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSignup = async () => {
+    if (!pendingData) return;
+
     try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+      // Show loading toast
+      const loadingToast = toast.loading("Creating account...", {
+        position: "top-right",
       });
-      const result = await response.json();
-      if (response.ok) {
-        login(data.name.trim());
+
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      console.log("Form Submitted:", pendingData);
+      login(pendingData.name.trim());
+      
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success(`Account created successfully! Welcome, ${pendingData.name}!`, {
+        position: "top-right",
+      });
+
+      // Close modal and redirect
+      setShowConfirmModal(false);
+      setTimeout(() => {
         router.push("/");
-      } else {
-        alert(result.message || "Signup failed");
-      }
+      }, 1000);
+
     } catch (error) {
-      alert("Signup failed. Please try again later.");
       console.error("Signup failed:", error);
+      toast.error("Account creation failed. Please try again.", {
+        position: "top-right",
+      });
     }
+  };
+
+  const handleCancelSignup = () => {
+    setShowConfirmModal(false);
+    setPendingData(null);
+    toast("Account creation cancelled", {
+      icon: "",
+      position: "top-right",
+    });
   };
 
   return (
@@ -109,16 +143,18 @@ export default function SignupPage() {
             <div className="w-full">
               <Button
                 type="submit"
-                label={isSubmitting ? "Creating account..." : "Create Account"}
+                label={isSubmitting ? "Processing..." : "Create Account"}
                 disabled={isSubmitting}
                 variant="success"
                 size="lg"
                 icon={
                   isSubmitting ? (
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
+                    <div className="w-5 h-5 animate-spin">
+                      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    </div>
                   ) : (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -151,6 +187,41 @@ export default function SignupPage() {
           </p>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={handleCancelSignup}
+        title="Confirm Account Creation"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Are you sure you want to create an account for <strong>{pendingData?.name}</strong>?
+          </p>
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Email: {pendingData?.email}</p>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <div className="flex-1">
+              <Button
+                label="Cancel"
+                onClick={handleCancelSignup}
+                variant="outline"
+                size="md"
+              />
+            </div>
+            <div className="flex-1">
+              <Button
+                label="Create Account"
+                onClick={handleConfirmSignup}
+                variant="success"
+                size="md"
+              />
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
