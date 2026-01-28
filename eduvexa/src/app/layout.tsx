@@ -5,6 +5,7 @@ import { LayoutWrapper } from "@/components";
 import { AuthProvider } from "../context/AuthContext";
 import { UIProvider } from "../context/UIContext";
 import ThemedBody from "./themed-body";
+import ToastProvider from "@/components/ui/ToastProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,6 +28,7 @@ export default function RootLayout({
         <UIProvider>
           <ThemedBody>
             <LayoutWrapper>{children}</LayoutWrapper>
+            <ToastProvider />
           </ThemedBody>
         </UIProvider>
       </AuthProvider>

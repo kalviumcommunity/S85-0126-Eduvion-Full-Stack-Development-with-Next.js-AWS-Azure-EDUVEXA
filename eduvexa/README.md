@@ -30,6 +30,8 @@ This project demonstrates advanced form handling using React Hook Form and Zod v
 - **Zod**: Provides declarative schema validation with TypeScript support
 - **@hookform/resolvers**: Seamlessly connects Zod to React Hook Form
 - **Tailwind CSS**: For modern, responsive styling
+- **React Hot Toast**: For elegant toast notifications
+- **Custom Modal Component**: For blocking confirmations
 
 ### Features Implemented
 
@@ -39,6 +41,9 @@ This project demonstrates advanced form handling using React Hook Form and Zod v
 - User icon and loading states
 - Accessibility-focused form inputs
 - Real-time validation feedback
+- **NEW**: Confirmation modal before login
+- **NEW**: Toast notifications for success/error states
+- **NEW**: Comprehensive validation (name, email, password)
 
 #### 2. Comprehensive Signup Form (`/app/signup/page.tsx`)
 - Multi-field validation (name, email, password)
@@ -46,6 +51,8 @@ This project demonstrates advanced form handling using React Hook Form and Zod v
 - Form validation with specific error messages
 - Loading states and transitions
 - Terms of Service and Privacy Policy links
+- **NEW**: Confirmation modal before account creation
+- **NEW**: Toast notifications for success/error states
 
 #### 3. Reusable FormInput Component (`/components/ui/FormInput.tsx`)
 - TypeScript-based prop interface
@@ -53,13 +60,55 @@ This project demonstrates advanced form handling using React Hook Form and Zod v
 - Error state handling with visual feedback
 - Focus states and transitions
 - Accessibility features (labels, ARIA attributes)
+- **NEW**: Matches existing UI design system perfectly
+
+#### 4. Toast Notifications (`/components/ui/ToastProvider.tsx`)
+- Global toast provider with react-hot-toast
+- Custom styling for success, error, and loading states
+- Accessible with proper ARIA roles
+- Auto-dismiss after specified duration
+- **NEW**: Integrated with all form operations
+
+#### 5. Accessible Modal Component (`/components/ui/Modal.tsx`)
+- Full accessibility support with ARIA attributes
+- Focus trapping and restoration
+- Keyboard navigation (ESC to close)
+- Backdrop click to close
+- Multiple size variants (sm, md, lg, xl)
+- **NEW**: Used for confirmation dialogs
+
+#### 6. Loader/Spinner Component (`/components/ui/Loader.tsx`)
+- Multiple size variants (sm, md, lg)
+- Optional text labels
+- Full-screen or inline modes
+- Accessible with `aria-live="polite"`
+- **NEW**: Consistent loading states across app
 
 ### Validation Schemas
 
 #### Login Schema
 ```typescript
 const loginSchema = z.object({
-  userName: z.string().min(2, "Name must be at least 2 characters long"),
+  userName: z
+    .string()
+    .min(2, "Name must be at least 2 characters long")
+    .max(50, "Name cannot exceed 50 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
+    .trim()
+    .refine((val) => val.trim().length > 0, "Name cannot be empty or just whitespace"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Invalid email address")
+    .max(100, "Email cannot exceed 100 characters")
+    .toLowerCase()
+    .refine((val) => val.includes('.'), "Email must contain a domain"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(128, "Password cannot exceed 128 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number")
+    .refine((val) => !val.includes(' '), "Password cannot contain spaces"),
 });
 ```
 
@@ -72,31 +121,119 @@ const signupSchema = z.object({
 });
 ```
 
+## Feedback UI Implementation
+
+This project demonstrates comprehensive user feedback patterns following modern UX principles:
+
+### Feedback Types Implemented
+
+#### 1. Instant Feedback (Toast Notifications)
+**Use Cases**: Form submission success, errors, cancellations
+**Implementation**: React Hot Toast with custom styling
+**Features**:
+- Auto-dismiss after 3-5 seconds
+- Color-coded (success=green, error=red, loading=blue)
+- Accessible with `aria-live="polite"`
+- Position: top-right corner
+
+**Examples**:
+```typescript
+// Success toast
+toast.success(`Welcome back, ${userName}!`);
+
+// Error toast
+toast.error("Login failed. Please try again.");
+
+// Loading toast
+const loadingToast = toast.loading("Signing in...");
+toast.dismiss(loadingToast);
+```
+
+#### 2. Blocking Feedback (Modal Dialogs)
+**Use Cases**: Confirmation before critical actions
+**Implementation**: Custom accessible Modal component
+**Features**:
+- Focus trapping inside modal
+- ESC key to close
+- Backdrop click to close
+- Restore focus on close
+- Multiple size variants
+
+**Examples**:
+- Login confirmation modal
+- Account creation confirmation modal
+- Shows user data for verification
+
+#### 3. Process Feedback (Loaders/Spinners)
+**Use Cases**: Async operations, form submissions
+**Implementation**: Custom Loader component
+**Features**:
+- Multiple sizes (sm, md, lg)
+- Optional text labels
+- Full-screen or inline modes
+- Accessible with `aria-live="polite"`
+
+### User Flow Demonstrations
+
+#### Login Flow:
+1. **Form Validation** → Real-time error messages
+2. **Submit** → Confirmation modal (blocking feedback)
+3. **Confirm** → Loading toast + spinner (process feedback)
+4. **Success** → Success toast (instant feedback)
+5. **Redirect** → Navigate to dashboard
+
+#### Signup Flow:
+1. **Form Validation** → Real-time error messages  
+2. **Submit** → Confirmation modal (blocking feedback)
+3. **Confirm** → Loading toast + spinner (process feedback)
+4. **Success** → Success toast (instant feedback)
+5. **Redirect** → Navigate to dashboard
+
 ### Accessibility Features
 
-- **Semantic HTML**: Proper use of `<label>`, `<input>`, and `<form>` elements
-- **Screen Reader Support**: Clear labels and error messages
-- **Keyboard Navigation**: Focus states and logical tab order
-- **Visual Feedback**: Error states, loading indicators, and hover effects
-- **Color Contrast**: High contrast text for readability
+#### Toast Notifications:
+- `role="status"` and `aria-live="polite"` for screen readers
+- High contrast colors for readability
+- Keyboard dismissible
+- Focus management
 
-### UI/UX Enhancements
+#### Modal Dialogs:
+- `role="dialog"` and `aria-modal="true"`
+- `aria-labelledby` for proper labeling
+- Focus trapping and restoration
+- Keyboard navigation support
+- ESC key functionality
 
-- **Modern Design**: Gradient backgrounds, rounded corners, and shadows
-- **Micro-interactions**: Smooth transitions and hover effects
-- **Loading States**: Animated spinners during form submission
-- **Error Handling**: Clear, actionable error messages with icons
-- **Responsive Design**: Mobile-friendly layouts
-- **Visual Hierarchy**: Clear typography and spacing
+#### Loaders:
+- `aria-live="polite"` for screen readers
+- Descriptive text labels
+- Non-blocking user experience
+
+### UX Principles Followed
+
+1. **Non-Intrusive**: Feedback doesn't block user flow unnecessarily
+2. **Informative**: Clear, actionable messages for all states
+3. **Accessible**: Full screen reader and keyboard support
+4. **Consistent**: Unified design language across all feedback types
+5. **Timely**: Immediate feedback for user actions
+6. **Recoverable**: Users can cancel or retry actions
+
+### Design Consistency
+
+- **Color Scheme**: Success (green), Error (red), Loading (indigo)
+- **Animation Speed**: Smooth transitions (200-300ms)
+- **Typography**: Consistent with EDUVEXA design system
+- **Spacing**: Follows established spacing patterns
+- **Icons**: Consistent icon family and sizing
 
 ### Benefits of Implementation
 
-1. **Type Safety**: Full TypeScript integration with Zod schemas
-2. **Performance**: Optimized re-renders with React Hook Form
-3. **Reusability**: Modular FormInput component for consistent forms
-4. **Accessibility**: WCAG-compliant form design
-5. **User Experience**: Modern, intuitive interface with clear feedback
-6. **Maintainability**: Clean separation of concerns and validation logic
+1. **User Trust**: Clear communication builds confidence
+2. **Error Reduction**: Confirmation modals prevent mistakes
+3. **Accessibility**: WCAG-compliant feedback system
+4. **Performance**: Optimized toast notifications
+5. **Maintainability**: Reusable components
+6. **User Experience**: Professional, responsive interface
 
 ### Validation Screenshots
 
@@ -104,13 +241,18 @@ The forms provide:
 - Real-time validation feedback
 - Clear error messages with visual indicators
 - Loading states during submission
-- Success feedback and navigation
+- Success feedback with toast notifications
+- Confirmation modals for critical actions
 
-### Reflection on Accessibility and Reusability
+### Reflection on Feedback UI Design
 
-**Accessibility**: The implementation prioritizes accessibility through proper semantic HTML, ARIA attributes, keyboard navigation support, and clear visual feedback. Error messages are descriptive and associated with their respective form fields.
+**Accessibility**: The implementation prioritizes accessibility through proper ARIA attributes, focus management, and keyboard navigation. All feedback elements are screen reader friendly and follow WCAG guidelines.
 
-**Reusability**: The FormInput component demonstrates excellent reusability by accepting props for different input types, icons, labels, and error states. This approach reduces code duplication and ensures consistent form behavior across the application.
+**User Experience**: The multi-layered feedback system ensures users always understand what's happening. Instant toasts provide quick feedback, modals prevent critical errors, and loaders show process status.
+
+**Technical Excellence**: The components are reusable, type-safe, and follow React best practices. The toast system is performant and the modal system is fully accessible.
+
+**Design Integration**: All feedback elements seamlessly integrate with the EDUVEXA design system, maintaining brand consistency while providing excellent user feedback.
 
 ## Learn More
 
