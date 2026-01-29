@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
+      <div className="hero-gradient rounded-2xl p-8 text-white shadow-xl">
         <h1 className="text-4xl font-bold mb-2">
           {isLoggedIn ? `Hi ${userName} 👋` : "Welcome back, Team! 👋"}
         </h1>
@@ -66,8 +66,8 @@ export default function Home() {
       {/* Recent Activity & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <Card title="Recent Activity" variant="gradient" className="lg:col-span-2">
-          <div className="space-y-4">
+        <Card title="Recent Activity" variant="bordered" className="lg:col-span-2">
+          <div className="space-y-3">
             {[
               { user: "John Doe", action: "completed", task: "Design Homepage Mockup", time: "2 hours ago", status: "success" },
               { user: "Jane Smith", action: "started", task: "API Integration", time: "3 hours ago", status: "info" },

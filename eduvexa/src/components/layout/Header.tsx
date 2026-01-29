@@ -12,14 +12,14 @@ export default function Header() {
   const auth = useAuth();
   const ui = useUI();
 
-  // Apply theme to body
+  // Apply theme to <html> for better Tailwind/Next.js compatibility
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      const body = document.body;
+      const html = document.documentElement;
       if (ui.theme === "dark") {
-        body.classList.add("dark");
+        html.classList.add("dark");
       } else {
-        body.classList.remove("dark");
+        html.classList.remove("dark");
       }
     }
   }, [ui.theme]);
@@ -86,7 +86,7 @@ export default function Header() {
               onClick={ui.toggleTheme}
               aria-label="Toggle theme"
             >
-              {ui.theme === 'light' ? '🌞 Light' : '🌙 Dark'}
+              {ui.theme === 'light' ? '🌙 Dark' : '🌞 Light'}
             </button>
             {/* Notification Bell */}
             <div className="relative">
