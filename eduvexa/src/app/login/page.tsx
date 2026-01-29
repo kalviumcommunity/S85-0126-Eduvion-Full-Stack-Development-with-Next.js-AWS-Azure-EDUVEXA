@@ -61,31 +61,40 @@ export default function LoginPage() {
 
     try {
       // Show loading toast
-      const loadingToast = toast.loading("Signing in...", {
+      const loadingToast = toast.loading("Authenticating...", {
         position: "top-right",
       });
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Call login API with JWT authentication
+      const result = await login({
+        name: pendingData.userName,
+        email: pendingData.email,
+        password: pendingData.password,
+      });
 
-      console.log("Login form data:", pendingData);
-      login(pendingData.userName.trim());
-      
-      // Dismiss loading toast and show success
+      // Dismiss loading toast
       toast.dismiss(loadingToast);
-      toast.success(`Welcome back, ${pendingData.userName}!`, {
-        position: "top-right",
-      });
 
-      // Close modal and redirect
-      setShowConfirmModal(false);
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
+      if (result.success) {
+        // Show success toast
+        toast.success(`Welcome back, ${pendingData.userName}!`, {
+          position: "top-right",
+        });
 
+        // Close modal and redirect
+        setShowConfirmModal(false);
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      } else {
+        // Show error toast
+        toast.error(result.error || "Login failed. Please try again.", {
+          position: "top-right",
+        });
+      }
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Login failed. Please try again.", {
+      toast.error("An unexpected error occurred. Please try again.", {
         position: "top-right",
       });
     }

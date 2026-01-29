@@ -47,27 +47,36 @@ export default function SignupPage() {
         position: "top-right",
       });
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      console.log("Form Submitted:", pendingData);
-      login(pendingData.name.trim());
-      
-      // Dismiss loading toast and show success
-      toast.dismiss(loadingToast);
-      toast.success(`Account created successfully! Welcome, ${pendingData.name}!`, {
-        position: "top-right",
+      // Call login API with JWT authentication (signup uses same endpoint for demo)
+      const result = await login({
+        name: pendingData.name,
+        email: pendingData.email,
+        password: pendingData.password,
       });
 
-      // Close modal and redirect
-      setShowConfirmModal(false);
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
 
+      if (result.success) {
+        // Show success toast
+        toast.success(`Account created successfully! Welcome, ${pendingData.name}!`, {
+          position: "top-right",
+        });
+
+        // Close modal and redirect
+        setShowConfirmModal(false);
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      } else {
+        // Show error toast
+        toast.error(result.error || "Account creation failed. Please try again.", {
+          position: "top-right",
+        });
+      }
     } catch (error) {
       console.error("Signup failed:", error);
-      toast.error("Account creation failed. Please try again.", {
+      toast.error("An unexpected error occurred. Please try again.", {
         position: "top-right",
       });
     }
