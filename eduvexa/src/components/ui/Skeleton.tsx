@@ -1,21 +1,47 @@
-import React from 'react';
+import React, { memo } from 'react';
 
+// Enhanced TypeScript interfaces for better type safety
 interface SkeletonProps {
   className?: string;
   variant?: 'text' | 'circular' | 'rectangular' | 'rounded';
   width?: string | number;
   height?: string | number;
   lines?: number; // For text variant
+  animation?: 'pulse' | 'wave' | 'none';
+  shimmer?: boolean;
+  speed?: 'slow' | 'normal' | 'fast';
 }
 
-export default function Skeleton({
+// Animation variants for different loading effects
+const animationClasses = {
+  pulse: 'animate-pulse',
+  wave: 'animate-pulse',
+  none: '',
+};
+
+const animationDuration = {
+  slow: 'animate-pulse-slow',
+  normal: 'animate-pulse',
+  fast: 'animate-pulse-fast',
+};
+
+// Memoized skeleton component for performance optimization
+const Skeleton = memo<SkeletonProps>(({
   className = '',
   variant = 'text',
   width,
   height,
   lines = 1,
-}: SkeletonProps) {
-  const baseClasses = 'animate-pulse bg-gray-200 dark:bg-gray-700';
+  animation = 'pulse',
+  shimmer = false,
+  speed = 'normal',
+}) => {
+  const baseClasses = [
+    'bg-gray-200 dark:bg-gray-700',
+    shimmer && 'relative overflow-hidden',
+    animation !== 'none' && animationClasses[animation],
+    speed !== 'normal' && animationDuration[speed],
+  ].filter(Boolean).join(' ');
   
   const variantClasses = {
     text: 'h-4 rounded',
@@ -24,23 +50,31 @@ export default function Skeleton({
     rounded: 'rounded-lg',
   };
 
-  const style = {
+  const style: React.CSSProperties = {
     width: width || (variant === 'text' ? '100%' : '40px'),
     height: height || (variant === 'text' ? '1rem' : '40px'),
   };
 
+  // Shimmer effect overlay
+  const shimmerOverlay = shimmer && (
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+  );
+
+  // Handle multiple lines for text variant
   if (variant === 'text' && lines > 1) {
     return (
       <div className={`space-y-2 ${className}`}>
         {Array.from({ length: lines }, (_, index) => (
           <div
             key={index}
-            className={`${baseClasses} ${variantClasses[variant]}`}
+            className={`${baseClasses} ${variantClasses[variant]} relative`}
             style={{
               ...style,
-              width: index === lines - 1 ? '70%' : '100%', // Last line shorter
+              width: index === lines - 1 ? '70%' : '100%', // Last line shorter for natural look
             }}
-          />
+          >
+            {shimmerOverlay}
+          </div>
         ))}
       </div>
     );
@@ -48,11 +82,18 @@ export default function Skeleton({
 
   return (
     <div
-      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${className} relative`}
       style={style}
-    />
+    >
+      {shimmerOverlay}
+    </div>
   );
-}
+});
+
+// Export the memoized component as default
+Skeleton.displayName = 'Skeleton';
+
+export default Skeleton;
 
 // Predefined skeleton components for common patterns
 export function CardSkeleton() {
