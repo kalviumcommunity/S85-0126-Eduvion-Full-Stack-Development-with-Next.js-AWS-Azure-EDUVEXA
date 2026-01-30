@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { withRBAC } from "@/middleware/rbac";
 
-export async function GET() {
+export const GET = withRBAC("read", async (req) => {
   return NextResponse.json({
     success: true,
     message: "Welcome Admin! You have full access.",
   });
-}
+});

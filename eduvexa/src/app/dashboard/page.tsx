@@ -2,6 +2,8 @@
 
 import { Card, StatCard, Badge } from "@/components";
                       import { useState } from "react";
+                      import { hasPermission } from "@/lib/rbacConfig";
+                      import { useAuth } from "@/hooks/useAuth";
 
                       function WeeklyActivityDashboard() {
                         const data = [
@@ -93,14 +95,27 @@ import { Card, StatCard, Badge } from "@/components";
                       }
 
                       export default function DashboardPage() {
+                        const { user } = useAuth();
                         return (
                           <div className="space-y-8">
+                            {/* Role Banner - shows difference between ADMIN and normal user */}
+                            {user && (
+                              <div className="mb-6">
+                                <div className="px-4 py-2 rounded-lg font-semibold text-white"
+                                  style={{ background: user.role === "ADMIN" ? "#4f46e5" : user.role === "editor" ? "#6366f1" : "#64748b" }}>
+                                  {user.role === "ADMIN"
+                                    ? "You are logged in as: ADMIN (Full Access)"
+                                    : user.role === "editor"
+                                    ? "You are logged in as: Editor (Limited Access)"
+                                    : "You are logged in as: Viewer (Read Only)"}
+                                </div>
+                              </div>
+                            )}
                             {/* Page Header */}
                             <div>
                               <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
                               <p className="text-gray-600">Overview of your work activities and performance metrics</p>
                             </div>
-
                             {/* Performance Metrics */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                               <StatCard
@@ -149,19 +164,18 @@ import { Card, StatCard, Badge } from "@/components";
                                 color="yellow"
                               />
                             </div>
-
                             {/* Today's Schedule & Task Distribution */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                               {/* Today's Schedule */}
                               <Card title="Today's Schedule" variant="gradient">
                                 <div className="space-y-3">
-                                  {[
+                                  {([
                                     { time: "09:00 AM", task: "Team Standup Meeting", duration: "30 min", type: "meeting" },
                                     { time: "10:00 AM", task: "Complete API Documentation", duration: "2 hours", type: "development" },
                                     { time: "01:00 PM", task: "Code Review Session", duration: "1 hour", type: "review" },
                                     { time: "03:00 PM", task: "Client Presentation", duration: "45 min", type: "meeting" },
                                     { time: "04:30 PM", task: "Bug Fixes & Testing", duration: "1.5 hours", type: "development" },
-                                  ].map((item, index) => (
+                                  ]).map((item, index) => (
                                     <div key={index} className="flex items-center gap-4 p-3 bg-white rounded-lg border border-gray-100">
                                       <div className="flex-shrink-0 w-20 text-sm font-semibold text-indigo-600">
                                         {item.time}
@@ -179,16 +193,15 @@ import { Card, StatCard, Badge } from "@/components";
                                   ))}
                                 </div>
                               </Card>
-
                               {/* Task Distribution */}
                               <Card title="Task Distribution" variant="bordered">
                                 <div className="space-y-4">
-                                  {[
+                                  {([
                                     { category: "Development", count: 12, color: "bg-indigo-500", percentage: 40 },
                                     { category: "Code Review", count: 5, color: "bg-purple-500", percentage: 20 },
                                     { category: "Meetings", count: 8, color: "bg-pink-500", percentage: 25 },
                                     { category: "Documentation", count: 4, color: "bg-green-500", percentage: 15 },
-                                  ].map((item, index) => (
+                                  ]).map((item, index) => (
                                     <div key={index}>
                                       <div className="flex justify-between items-center mb-2">
                                         <div className="flex items-center gap-2">
@@ -211,10 +224,8 @@ import { Card, StatCard, Badge } from "@/components";
                                 </div>
                               </Card>
                             </div>
-
                             {/* Modern dashboard style with clickable bars */}
                             <WeeklyActivityDashboard />
-
                             {/* Link to Weekly Activity Page */}
                             <div className="flex justify-center mt-12">
                               <a
@@ -224,6 +235,16 @@ import { Card, StatCard, Badge } from "@/components";
                                 View Full Weekly Activity Report
                               </a>
                             </div>
+                            {/* Create New Project Button */}
+                            {user && hasPermission(user.role, "create") && (
+                              <div className="flex justify-end mb-4">
+                                <a href="/projects/new">
+                                  <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold shadow hover:bg-indigo-700 transition">
+                                    Create New Project
+                                  </button>
+                                </a>
+                              </div>
+                            )}
                           </div>
                         );
                       }

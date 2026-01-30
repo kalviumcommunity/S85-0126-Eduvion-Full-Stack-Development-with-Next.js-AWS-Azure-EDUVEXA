@@ -4,13 +4,13 @@ import { Button, Card, StatCard, Badge } from "@/components";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Home() {
-  const { isLoggedIn, userName } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
       <div className="hero-gradient rounded-2xl p-8 text-white shadow-xl">
         <h1 className="text-4xl font-bold mb-2">
-          {isLoggedIn ? `Hi ${userName} 👋` : "Welcome back, Team! 👋"}
+          {isLoggedIn && user ? `Hi ${user.name} 👋` : "Welcome back, Team! 👋"}
         </h1>
         <p className="text-purple-100 text-lg">Track your work, collaborate with your team, and boost productivity.</p>
       </div>

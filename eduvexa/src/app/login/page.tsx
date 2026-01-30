@@ -13,13 +13,6 @@ import { toast } from "../../components/ui/ToastProvider";
 import { useState } from "react";
 
 const loginSchema = z.object({
-  userName: z
-    .string()
-    .min(2, "Name must be at least 2 characters long")
-    .max(50, "Name cannot exceed 50 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
-    .trim()
-    .refine((val) => val.trim().length > 0, "Name cannot be empty or just whitespace"),
   email: z
     .string()
     .min(1, "Email is required")
@@ -67,7 +60,6 @@ export default function LoginPage() {
 
       // Call login API with JWT authentication
       const result = await login({
-        name: pendingData.userName,
         email: pendingData.email,
         password: pendingData.password,
       });
@@ -76,21 +68,13 @@ export default function LoginPage() {
       toast.dismiss(loadingToast);
 
       if (result.success) {
-        // Show success toast
-        toast.success(`Welcome back, ${pendingData.userName}!`, {
-          position: "top-right",
-        });
-
-        // Close modal and redirect
+        toast.success(`Login successful!`, { position: "top-right" });
         setShowConfirmModal(false);
         setTimeout(() => {
           router.push("/");
         }, 1000);
       } else {
-        // Show error toast
-        toast.error(result.error || "Login failed. Please try again.", {
-          position: "top-right",
-        });
+        toast.error(result.error || "Login failed. Please try again.", { position: "top-right" });
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -110,10 +94,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full mb-6 shadow-lg">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-r from-indigo-600 to-purple-600 rounded-full mb-6 shadow-lg">
             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
@@ -125,19 +109,7 @@ export default function LoginPage() {
 
         <Card variant="gradient" className="shadow-xl">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <FormInput
-              label="Full Name"
-              type="text"
-              placeholder="Enter your full name"
-              icon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              }
-              {...register("userName")}
-              error={errors.userName?.message}
-              required
-            />
+
 
             <FormInput
               label="Email Address"
@@ -224,7 +196,7 @@ export default function LoginPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-600">
-            Are you sure you want to sign in as <strong>{pendingData?.userName}</strong>?
+            Are you sure you want to sign in as <strong>{pendingData?.email}</strong>?
           </p>
           <div className="bg-gray-50 p-3 rounded-lg">
             <p className="text-sm text-gray-500">Email: {pendingData?.email}</p>

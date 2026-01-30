@@ -81,7 +81,7 @@ export default function Sidebar() {
                     flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                     ${isActive 
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md' 
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-indigo-600'
                     }
                   `}
                 >
