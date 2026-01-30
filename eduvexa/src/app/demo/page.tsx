@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CardSkeleton, TableSkeleton, DashboardSkeleton } from '../../components/ui/Skeleton';
 import { NetworkErrorFallback } from '../../components/ui/ErrorBoundary';
 import Button from '../../components/ui/Button';
