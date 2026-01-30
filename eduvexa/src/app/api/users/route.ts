@@ -2,9 +2,10 @@ import { ZodError } from "zod";
 import { userSchema } from "@/lib/schemas/userSchema";
 import { safeRedisOperation } from "@/lib/redis";
 import { sendSuccess, sendError, ERROR_CODES } from "@/lib/responseHandler";
+import { withRBAC } from "@/middleware/rbac";
 
 // GET /api/users?page=1&limit=10 (with Redis caching)
-export async function GET(req: Request) {
+export const GET = withRBAC("read", async (req) => {
   try {
     const { searchParams } = new URL(req.url);
 
@@ -69,7 +70,7 @@ export async function GET(req: Request) {
       error instanceof Error ? error.message : undefined
     );
   }
-}
+});
 
 // POST /api/users
 export async function POST(req: Request) {

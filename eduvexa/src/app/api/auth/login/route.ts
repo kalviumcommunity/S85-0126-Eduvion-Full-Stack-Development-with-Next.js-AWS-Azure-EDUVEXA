@@ -37,15 +37,28 @@ export async function POST(req: Request) {
       );
     }
 
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
-    );
+
+    // Debug: log user object before signing JWT
+    console.log('Login user:', user);
+    let token;
+    try {
+      token = jwt.sign(
+        {
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+    } catch (jwtError) {
+      console.error('JWT sign error:', jwtError);
+      return NextResponse.json(
+        { message: "JWT sign error", error: jwtError instanceof Error ? jwtError.message : jwtError },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       message: "Login successful",
@@ -58,8 +71,9 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
+    console.error('Login route error:', error);
     return NextResponse.json(
-      { message: "Login failed" },
+      { message: "Login failed", error: error instanceof Error ? error.message : error },
       { status: 500 }
     );
   }

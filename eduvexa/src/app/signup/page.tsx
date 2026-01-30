@@ -20,7 +20,7 @@ const signupSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const router = useRouter();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingData, setPendingData] = useState<SignupFormData | null>(null);
@@ -40,45 +40,26 @@ export default function SignupPage() {
 
   const handleConfirmSignup = async () => {
     if (!pendingData) return;
-
     try {
-      // Show loading toast
-      const loadingToast = toast.loading("Creating account...", {
-        position: "top-right",
-      });
-
-      // Call login API with JWT authentication (signup uses same endpoint for demo)
-      const result = await login({
+      const loadingToast = toast.loading("Creating account...", { position: "top-right" });
+      const result = await signup({
         name: pendingData.name,
         email: pendingData.email,
         password: pendingData.password,
       });
-
-      // Dismiss loading toast
       toast.dismiss(loadingToast);
-
       if (result.success) {
-        // Show success toast
-        toast.success(`Account created successfully! Welcome, ${pendingData.name}!`, {
-          position: "top-right",
-        });
-
-        // Close modal and redirect
+        toast.success(`Account created successfully! Welcome, ${pendingData.name}!`, { position: "top-right" });
         setShowConfirmModal(false);
         setTimeout(() => {
-          router.push("/");
+          router.push("/login");
         }, 1000);
       } else {
-        // Show error toast
-        toast.error(result.error || "Account creation failed. Please try again.", {
-          position: "top-right",
-        });
+        toast.error(result.error || "Account creation failed. Please try again.", { position: "top-right" });
       }
     } catch (error) {
       console.error("Signup failed:", error);
-      toast.error("An unexpected error occurred. Please try again.", {
-        position: "top-right",
-      });
+      toast.error("An unexpected error occurred. Please try again.", { position: "top-right" });
     }
   };
 
@@ -92,10 +73,10 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-6 shadow-lg">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-r from-purple-600 to-indigo-600 rounded-full mb-6 shadow-lg">
             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>

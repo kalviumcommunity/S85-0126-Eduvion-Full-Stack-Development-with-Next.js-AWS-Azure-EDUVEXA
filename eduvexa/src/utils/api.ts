@@ -24,7 +24,8 @@ class ApiClient {
   private isRefreshing = false;
   private refreshSubscribers: Array<(token: string | null) => void> = [];
 
-  constructor(baseURL: string = 'http://localhost:3001/api') {
+  // Use relative URL for Next.js API routes
+  constructor(baseURL: string = '') {
     this.baseURL = baseURL;
   }
 
@@ -177,34 +178,52 @@ class ApiClient {
   async login(credentials: {
     email: string;
     password: string;
-    name: string;
   }): Promise<ApiResponse<LoginResponse>> {
-    // In production, this would call your actual login API
-    console.log('Login attempt:', credentials);
-    
-    // Demo implementation - simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Demo user data
-    const user = {
-      id: 'user_' + Date.now(),
-      name: credentials.name,
-      email: credentials.email,
-    };
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.message || 'Login failed' };
+      }
+      // Store tokens if provided (update as needed)
+      if (data.token) {
+        JWTManager.setTokens({ accessToken: data.token, refreshToken: '' });
+      }
+      return {
+        success: true,
+        data: {
+          user: data.user,
+          tokens: { accessToken: data.token, refreshToken: '' },
+        },
+      };
+    } catch (error) {
+      return { success: false, error: 'Login failed' };
+    }
+  }
 
-    // Demo tokens (in production, these come from your backend)
-    const tokens = {
-      accessToken: this.generateDemoAccessToken(user),
-      refreshToken: this.generateDemoRefreshToken(user),
-    };
-
-    // Store tokens
-    JWTManager.setTokens(tokens);
-
-    return {
-      success: true,
-      data: { user, tokens },
-    };
+  async signup(credentials: {
+    name: string;
+    email: string;
+    password: string;
+  }): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.message || 'Signup failed' };
+      }
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: 'Signup failed' };
+    }
   }
 
   /**
@@ -271,6 +290,7 @@ export const apiClient = new ApiClient();
 // Export convenience functions
 export const api = {
   login: apiClient.login.bind(apiClient),
+  signup: apiClient.signup.bind(apiClient),
   logout: apiClient.logout.bind(apiClient),
   getProfile: apiClient.getProfile.bind(apiClient),
   get: apiClient.get.bind(apiClient),

@@ -1,6 +1,6 @@
 "use client";
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { JWTManager, JWTPayload } from '../utils/jwt';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { JWTManager } from '../utils/jwt';
 import { api } from '../utils/api';
 
 interface User {
@@ -13,7 +13,8 @@ interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
   isLoading: boolean;
-  login: (credentials: { name: string; email: string; password: string }) => Promise<{ success: boolean; error?: string }>;
+  login: (credentials: { email: string; password: string }) => Promise<{ success: boolean; error?: string }>;
+  signup: (credentials: { name: string; email: string; password: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
 }
@@ -65,34 +66,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   /**
    * Login with credentials
    */
-  const login = async (credentials: { name: string; email: string; password: string }) => {
+  const login = async (credentials: { email: string; password: string }) => {
     try {
       setIsLoading(true);
-      console.log('Attempting login with:', { name: credentials.name, email: credentials.email });
-
       const response = await api.login(credentials);
-      
       if (response.success && response.data) {
         const { user: userData, tokens } = response.data;
-        
-        // Store tokens
         JWTManager.setTokens(tokens);
-        
-        // Update state
         setUser(userData);
         setIsLoggedIn(true);
-        
-        console.log('Login successful:', userData);
         return { success: true };
       } else {
         const errorMessage = response.error || 'Login failed';
-        console.error('Login failed:', errorMessage);
         return { success: false, error: errorMessage };
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      console.error('Login error:', error);
-      return { success: false, error: errorMessage };
+      return { success: false, error: 'Login failed' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signup = async (credentials: { name: string; email: string; password: string }) => {
+    try {
+      setIsLoading(true);
+      const response = await api.signup(credentials);
+      if (response.success) {
+        return { success: true };
+      } else {
+        const errorMessage = response.error || 'Signup failed';
+        return { success: false, error: errorMessage };
+      }
+    } catch (error) {
+      return { success: false, error: 'Signup failed' };
     } finally {
       setIsLoading(false);
     }
@@ -166,6 +172,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       user, 
       isLoading, 
       login, 
+      signup,
       logout, 
       refreshToken 
     }}>
