@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword, generateToken, setAuthCookie } from "@/lib/auth";
+// OWASP: Import input sanitization utility
+import { sanitizeInput } from "@/lib/sanitizeInput";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 
@@ -22,7 +24,9 @@ export async function POST(req: NextRequest) {
     
     // Validate input
     const validatedData = loginSchema.parse(body);
-    const { email, password } = validatedData;
+    // OWASP: Sanitize user-controlled input before DB lookup
+    const email = sanitizeInput(validatedData.email);
+    const password = validatedData.password; // Passwords should not be sanitized
 
     // Find user
     logger.logDatabaseOperation('findUnique', 'user', requestId, undefined, { 
@@ -99,13 +103,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Login successful",
-      data: {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {

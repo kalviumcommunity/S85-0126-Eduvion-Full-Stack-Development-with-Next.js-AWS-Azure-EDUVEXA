@@ -45,8 +45,8 @@ export default function AppLayoutWithSidebar({ children, title }: AppLayoutWithS
 
             {/* App Logo/Title */}
             <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">E</span>
+              <div className="w-8 h-8 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                 <span className="text-white font-bold text-sm">E</span>
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -82,10 +82,10 @@ export default function AppLayoutWithSidebar({ children, title }: AppLayoutWithS
                   href="/profile"
                   className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
+                  <div className="w-8 h-8 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -129,7 +129,7 @@ export default function AppLayoutWithSidebar({ children, title }: AppLayoutWithS
         {/* Sidebar */}
         <aside
           className={`
-            fixed left-0 top-16 bottom-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out flex-shrink-0
+            fixed left-0 top-16 bottom-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out shrink-0
             ${isSidebarOpen ? "w-64" : "w-0 overflow-hidden"}
           `}
         >
