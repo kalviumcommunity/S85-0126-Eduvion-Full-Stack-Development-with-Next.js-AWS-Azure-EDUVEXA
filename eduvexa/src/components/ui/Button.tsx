@@ -1,11 +1,17 @@
+import React from 'react';
+
 interface ButtonProps {
   label: string;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "success" | "danger" | "outline";
+  variant?: "primary" | "secondary" | "success" | "warning" | "danger" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   icon?: React.ReactNode;
   type?: "button" | "submit" | "reset";
+  loading?: boolean;
+  fullWidth?: boolean;
+  href?: string;
+  target?: string;
 }
 
 export default function Button({ 
@@ -15,33 +21,70 @@ export default function Button({
   size = "md",
   disabled = false,
   icon,
-  type = "button"
+  type = "button",
+  loading = false,
+  fullWidth = false,
+  href,
+  target
 }: ButtonProps) {
-  const baseStyles = "font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseStyles = "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
   
   const variantStyles = {
-    primary: "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700",
-    secondary: "bg-gray-200 text-gray-700 hover:bg-gray-300",
-    success: "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700",
-    danger: "bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700",
-    outline: "border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+    primary: "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-soft hover:shadow-medium",
+    secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-primary-500 shadow-soft hover:shadow-medium",
+    success: "bg-success-600 text-white hover:bg-success-700 focus:ring-success-500 shadow-soft hover:shadow-medium",
+    warning: "bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500 shadow-soft hover:shadow-medium",
+    danger: "bg-error-600 text-white hover:bg-error-700 focus:ring-error-500 shadow-soft hover:shadow-medium",
+    outline: "border-2 border-primary-500 text-primary-600 hover:bg-primary-50 focus:ring-primary-500",
+    ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:ring-primary-500",
   };
   
   const sizeStyles = {
     sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg"
+    md: "px-4 py-2 text-sm",
+    lg: "px-6 py-3 text-base",
   };
+
+  const widthStyles = fullWidth ? "w-full" : "";
+
+  const LoadingSpinner = () => (
+    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  );
+
+  const content = (
+    <>
+      {loading && <LoadingSpinner />}
+      {!loading && icon && <span className="mr-2">{icon}</span>}
+      <span>{label}</span>
+    </>
+  );
+
+  const buttonClasses = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyles}`;
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target={target}
+        className={buttonClasses}
+        onClick={onClick}
+      >
+        {content}
+      </a>
+    );
+  }
 
   return (
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]}`}
+      disabled={disabled || loading}
+      className={buttonClasses}
     >
-      {icon && <span>{icon}</span>}
-      {label}
+      {content}
     </button>
   );
 }

@@ -17,7 +17,6 @@ export interface TokenPair {
 export class JWTManager {
   private static ACCESS_TOKEN_KEY = 'eduvexa_access_token';
   private static REFRESH_TOKEN_KEY = 'eduvexa_refresh_token';
-  private static REFRESH_TOKEN_COOKIE = 'eduvexa_refresh_token';
 
   /**
    * Store tokens securely

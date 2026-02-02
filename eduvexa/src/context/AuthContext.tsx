@@ -1,20 +1,25 @@
 "use client";
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { JWTManager, JWTPayload } from '../utils/jwt';
-import { api } from '../utils/api';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
+  role: string;
+  bio?: string;
+  avatar?: string;
+  createdAt: string;
 }
 
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
   isLoading: boolean;
-  login: (credentials: { name: string; email: string; password: string }) => Promise<{ success: boolean; error?: string }>;
+  login: (credentials: { email: string; password: string }) => Promise<{ success: boolean; error?: string }>;
+  signup: (credentials: { name: string; email: string; password: string; role?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
 }
 
@@ -24,131 +29,154 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  // Initialize auth state on mount
+  // Initialize auth state on mount (httpOnly cookies aren't in document.cookie, so always try /api/auth/me)
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
-        const token = JWTManager.getAccessToken();
-        
-        if (token && !JWTManager.isAccessTokenExpired()) {
-          const userPayload = JWTManager.getUserFromToken();
-          if (userPayload) {
-            setUser({
-              id: userPayload.userId,
-              name: userPayload.name,
-              email: userPayload.email,
-            });
-            setIsLoggedIn(true);
-            console.log('User authenticated from existing token');
-          }
-        } else if (JWTManager.isAccessTokenExpired() && JWTManager.getRefreshToken()) {
-          // Try to refresh the token
-          refreshAccessToken();
-        } else {
-          console.log('No valid tokens found');
-        }
+        await fetchUserFromToken();
       } catch (error) {
         console.error('Auth initialization failed:', error);
-        JWTManager.clearTokens();
       } finally {
         setIsLoading(false);
       }
     };
 
     initializeAuth();
-
-    // Set up token refresh timer
-    JWTManager.initializeTokenRefresh();
   }, []);
 
-  /**
-   * Login with credentials
-   */
-  const login = async (credentials: { name: string; email: string; password: string }) => {
+  const fetchUserFromToken = async () => {
     try {
-      setIsLoading(true);
-      console.log('Attempting login with:', { name: credentials.name, email: credentials.email });
-
-      const response = await api.login(credentials);
-      
-      if (response.success && response.data) {
-        const { user: userData, tokens } = response.data;
-        
-        // Store tokens
-        JWTManager.setTokens(tokens);
-        
-        // Update state
-        setUser(userData);
+      const response = await fetch('/api/auth/me', { credentials: 'include' });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData.user);
         setIsLoggedIn(true);
-        
-        console.log('Login successful:', userData);
-        return { success: true };
-      } else {
-        const errorMessage = response.error || 'Login failed';
-        console.error('Login failed:', errorMessage);
-        return { success: false, error: errorMessage };
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      console.error('Login error:', error);
-      return { success: false, error: errorMessage };
+      console.error('Failed to fetch user:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Logout user
-   */
+  const login = async (credentials: { email: string; password: string }) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUser(data.user);
+        setIsLoggedIn(true);
+        
+        // Redirect to dashboard or intended page
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect') || '/dashboard';
+        router.push(redirect);
+        
+        return { success: true };
+      } else {
+        const errorMessage = data.error || 'Login failed';
+        return { success: false, error: errorMessage };
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      return { success: false, error: 'Login failed' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signup = async (credentials: { name: string; email: string; password: string; role?: string }) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUser(data.user);
+        setIsLoggedIn(true);
+        
+        // Redirect to dashboard
+        router.push('/dashboard');
+        
+        return { success: true };
+      } else {
+        const errorMessage = data.error || 'Signup failed';
+        return { success: false, error: errorMessage };
+      }
+    } catch (error) {
+      console.error('Signup failed:', error);
+      return { success: false, error: 'Signup failed' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       setIsLoading(true);
       
       // Call logout API
-      await api.logout();
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
       
       // Clear local state
       setUser(null);
       setIsLoggedIn(false);
       
-      console.log('Logout successful');
+      // Redirect to home
+      router.push('/');
     } catch (error) {
       console.error('Logout error:', error);
       // Still clear local state even if API call fails
       setUser(null);
       setIsLoggedIn(false);
+      router.push('/');
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Refresh access token
-   */
-  const refreshAccessToken = async (): Promise<boolean> => {
+  const refreshUser = async (): Promise<void> => {
+    await fetchUserFromToken();
+  };
+
+  const refreshToken = async (): Promise<boolean> => {
     try {
-      console.log('Refreshing access token...');
-      const newToken = await JWTManager.refreshAccessToken();
-      
-      if (newToken) {
-        const userPayload = JWTManager.getUserFromToken();
-        if (userPayload) {
-          setUser({
-            id: userPayload.userId,
-            name: userPayload.name,
-            email: userPayload.email,
-          });
+      const response = await fetch('/api/auth/refresh', { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          setUser(data.user);
           setIsLoggedIn(true);
-          console.log('Token refresh successful');
           return true;
         }
       }
-      
+
       // If refresh failed, clear auth state
       setUser(null);
       setIsLoggedIn(false);
-      console.log('Token refresh failed, user logged out');
       return false;
     } catch (error) {
       console.error('Token refresh error:', error);
@@ -158,16 +186,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const refreshToken = refreshAccessToken;
-
   return (
-    <AuthContext.Provider value={{ 
+    <AuthContext.Provider value={{
       isLoggedIn, 
       user, 
       isLoading, 
-      login, 
-      logout, 
-      refreshToken 
+      login,
+      signup,
+      logout,
+      refreshUser,
+      refreshToken
     }}>
       {children}
     </AuthContext.Provider>

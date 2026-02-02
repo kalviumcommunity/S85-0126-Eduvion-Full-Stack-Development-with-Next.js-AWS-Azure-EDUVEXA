@@ -1,259 +1,123 @@
 # EDUVEXA
 
-## 📘 Project Overview
+EDUVEXA is a modern, full-stack educational collaboration platform designed to improve visibility into student engagement and project progress. It leverages dashboards, peer feedback mechanisms, and analytics to enhance collaboration, accountability, and learning outcomes.
 
-**EDUVEXA** is a modern, full-stack educational collaboration platform designed to improve visibility into student engagement and project progress. It leverages dashboards, peer feedback mechanisms, and analytics to enhance collaboration, accountability, and learning outcomes.
+## 🚀 Quick Start
 
-The project is built using an **industry-grade full-stack architecture** with Next.js, PostgreSQL, Prisma, Redis, Docker, and cloud deployment on AWS or Azure.
+### Prerequisites
+- Node.js 18+ 
+- PostgreSQL database
+- npm or yarn
 
----
+### Installation
 
-## ❗ Problem Statement
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd EDUVEXA
+   ```
 
-Educational institutions often lack real-time visibility into how students engage with learning activities and collaborative projects. Instructors typically discover issues—such as low participation, uneven team contributions, or delayed progress—only after final evaluations. Students, in turn, lack clarity about their own performance, peer contributions, and areas for improvement.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-This lack of transparency leads to:
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure your database URL in `.env.local`:
+   ```bash
+   DATABASE_URL="postgresql://username:password@localhost:5432/eduvexa"
+   JWT_SECRET="your-secret-key-here"
+   ```
 
-* Poor collaboration in group projects
-* Delayed instructor intervention
-* Reduced student motivation
-* Weaker learning outcomes
+4. **Set up the database**
+   ```bash
+   # Generate Prisma client
+   npx prisma generate
+   
+   # Run database migrations
+   npx prisma migrate dev
+   
+   # Seed the database with test data
+   npx prisma db seed
+   ```
 
----
+5. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-## 💡 Solution
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-EDUVEXA solves these challenges by combining **real-time dashboards** with **structured peer feedback mechanisms**. The platform provides continuous insight into engagement and progress while enabling students to actively participate in each other’s learning journey.
+## 🔐 Test Accounts
 
----
+After seeding the database, you can use these test accounts:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Student | alice@example.com | password123 |
+| Instructor | bob@example.com | password123 |
+| Admin | david@example.com | password123 |
 
 ## 🧩 Key Features
 
-### 📊 Engagement & Progress Dashboards
+- **📊 Real-time Dashboard** - Engagement metrics, task tracking, and activity monitoring
+- **🤝 Peer Feedback System** - Structured reviews with ratings and comments
+- **👥 Team Management** - User profiles, search, and statistics
+- **🚀 Project Management** - Task tracking with progress visualization
+- **🔐 Secure Authentication** - JWT-based auth with role-based access control
+- **🎨 Modern UI/UX** - Dark mode, responsive design, and smooth animations
 
-* Real-time tracking of student activity
-* Visual indicators for task completion and milestones
-* Individual and team-level analytics
+## �️ Tech Stack
 
-### 🤝 Peer Feedback System
+- **Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Node.js
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: JWT with HTTP-only cookies, bcrypt
+- **UI**: Custom components with Lucide React icons
 
-* Structured peer reviews
-* Qualitative and quantitative feedback
-* Encourages reflection and collaborative improvement
+## 📁 Project Structure
 
-### 🧑‍🏫 Instructor Insights
-
-* Early detection of disengaged students
-* Data-driven decision-making
-* Support for timely guidance and intervention
-
-### 🔐 Secure Role-Based Access
-
-* Separate roles for Students, Instructors, and Admins
-* Secure authentication and authorization
-
----
-
-## 🚀 Tech Stack – Sprint #1
-
-### 🖥️ Frontend
-
-* **Next.js** (React-based full-stack framework)
-* **React.js**
-* **TypeScript**
-* **HTML5 / CSS3**
-
-### ⚙️ Backend
-
-* **Next.js API Routes**
-* **Node.js**
-
-### 🗄️ Database
-
-* **PostgreSQL** (Relational database)
-
-### 🔗 ORM
-
-* **Prisma ORM** (Type-safe database access)
-
-### ⚡ Caching Layer
-
-* **Redis** (In-memory caching & session management)
-
-### 🐳 Containerization
-
-* **Docker** (Environment consistency across systems)
-
-### ☁️ Cloud & Deployment
-
-* **AWS** or **Microsoft Azure**
-
-### 🔄 CI/CD
-
-* **GitHub Actions** (Automated build, test, and deployment)
-
----
-
-## 🔁 System Architecture
-
-**Next.js (UI + API Routes)**
-↕
-**Prisma ORM**
-↕
-**PostgreSQL Database**
-↕
-**Redis (Caching Layer)**
-↕
-**Docker (Containerization)**
-↕
-**AWS / Azure (Deployment & Scaling)**
-
----
-
-## 🛠️ Use Cases
-
-* Universities running project-based learning courses
-* Colleges managing collaborative assignments
-* Online education platforms
-* Instructors handling large classrooms
-
----
-
-## 🔮 Future Enhancements
-
-* AI-powered feedback suggestions
-* Predictive analytics for student performance
-* LMS integration (Moodle, Canvas, etc.)
-* Gamification features for motivation
-
----
+```
+EDUVEXA/
+├── eduvexa/                    # Next.js app
+│   ├── src/
+│   │   ├── app/               # App Router pages
+│   │   │   ├── api/          # API routes
+│   │   │   ├── dashboard/    # Dashboard page
+│   │   │   ├── profile/      # Profile page
+│   │   │   ├── users/        # Team members page
+│   │   │   ├── projects/     # Projects page
+│   │   │   └── ...
+│   │   ├── components/        # Reusable components
+│   │   ├── context/          # React contexts
+│   │   ├── hooks/            # Custom hooks
+│   │   └── lib/              # Utilities
+│   └── ...
+├── prisma/
+│   ├── schema.prisma         # Database schema
+│   ├── migrations/           # Database migrations
+│   └── seed.ts              # Seed data
+├── .env.example              # Environment variables template
+└── README.md                # This file
+```
 
 ## 🎯 Learning Outcomes
 
 By working on EDUVEXA, developers gain hands-on experience with:
-
-* Full-stack development using Next.js
-* Database design with PostgreSQL & Prisma
-* Performance optimization using Redis
-* Containerization with Docker
-* CI/CD pipelines with GitHub Actions
-* Cloud deployment on AWS/Azure
-
----
-
-## 📌 Conclusion
-
-EDUVEXA reflects how **real-world, production-ready full-stack applications** are built. It not only improves educational collaboration but also mirrors modern industry practices, preparing developers for professional full-stack roles.
-
-> *“You’re not just building an app —  you’re learning how the modern web runs.”*
-
-
-
-
-
-
-## 🔐 Environment Variable Management
-
-This project uses environment variables to manage sensitive configuration securely.
-
-### Environment Files
-- `.env.local` – Stores actual secrets and local credentials (never committed)
-- `.env.example` – Template showing required variables and their purpose
-
-### Variables Used
-
-#### Server-side only
-- `DATABASE_URL`
-  - PostgreSQL connection string
-  - Accessible only on the server
-
-#### Client-side safe
-- `NEXT_PUBLIC_API_BASE_URL`
-  - Base URL for API requests
-  - Safe to expose to the client
-
-### Setup Instructions
-1. Copy `.env.example` to `.env.local`
-2. Replace placeholder values with real credentials
-3. Restart the development server
-
-### Common Pitfalls Avoided
-- Never exposing secrets without `NEXT_PUBLIC_`
-- Preventing `.env.local` from being committed
-- Separating client and server variables clearly
-
-
-
-
+- Full-stack Next.js development with App Router
+- TypeScript for type safety
+- Prisma ORM for database operations
+- JWT authentication and security best practices
+- Modern React patterns (Context, Hooks, Forms)
+- Responsive design with Tailwind CSS
+- Database design and relationships
+- API development with Next.js API routes
 
 ---
 
-## 🗄️ PostgreSQL Schema Design
-
-This project uses a normalized relational database schema designed to support scalability, data consistency, and efficient querying for dashboards and collaboration features.
-
-### Core Entities
-
-#### User
-- Represents a registered user (student or instructor)
-- Each user can own multiple projects
-
-**Key fields:**
-- `id` – Primary Key
-- `email` – Unique, prevents duplicate users
-- `role` – Defines user type (STUDENT, INSTRUCTOR)
-
----
-
-#### Project
-- Represents an educational or collaborative project
-- Each project belongs to exactly one user
-- A project can have multiple tasks
-
-**Key fields:**
-- `id` – Primary Key
-- `ownerId` – Foreign Key referencing `User(id)`
-
----
-
-#### Task
-- Represents an individual task within a project
-- Each task belongs to one project
-
-**Key fields:**
-- `id` – Primary Key
-- `projectId` – Foreign Key referencing `Project(id)`
-- `status` – Enum (`PENDING`, `IN_PROGRESS`, `COMPLETED`)
-
----
-
-### Relationships
-- One **User → Many Projects**
-- One **Project → Many Tasks**
-- Foreign keys enforce referential integrity
-- Cascading deletes ensure related data is cleaned automatically
-
----
-
-### Constraints & Indexes
-- Unique constraint on `User.email`
-- Enum used for `Task.status` to prevent invalid values
-- Indexes on frequently queried fields (`email`, `ownerId`, `projectId`, `status`) for faster dashboard queries
-
----
-
-### Normalization
-- Schema follows **Third Normal Form (3NF)**
-- No duplicated data across tables
-- Each table has a single responsibility
-- Relationships are handled using foreign keys
-
----
-
-### Why This Design Works
-- Supports scalable dashboards and analytics
-- Ensures data consistency and integrity
-- Optimized for common queries like:
-  - Fetching user projects
-  - Listing tasks by project or status
-  - Tracking project progress
+> *"You're not just building an app — you're learning how the modern web runs."*
