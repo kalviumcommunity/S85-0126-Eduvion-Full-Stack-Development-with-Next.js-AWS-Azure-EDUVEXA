@@ -249,39 +249,6 @@ class ApiClient {
   async getProfile(): Promise<ApiResponse> {
     return this.get('/auth/profile');
   }
-
-  /**
-   * Demo token generation (for development only)
-   */
-  private generateDemoAccessToken(user: any): string {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      exp: Math.floor(Date.now() / 1000) + (15 * 60), // 15 minutes
-      iat: Math.floor(Date.now() / 1000),
-      type: 'access'
-    }));
-    const signature = 'demo-access-signature';
-    
-    return `${header}.${payload}.${signature}`;
-  }
-
-  private generateDemoRefreshToken(user: any): string {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 days
-      iat: Math.floor(Date.now() / 1000),
-      type: 'refresh'
-    }));
-    const signature = 'demo-refresh-signature';
-    
-    return `${header}.${payload}.${signature}`;
-  }
 }
 
 // Export singleton instance
