@@ -1,39 +1,73 @@
+import React from 'react';
+
 interface CardProps {
   title?: string;
+  subtitle?: string;
   children: React.ReactNode;
   className?: string;
-  variant?: "default" | "gradient" | "bordered";
+  padding?: 'sm' | 'md' | 'lg';
+  hover?: boolean;
   footer?: React.ReactNode;
   headerAction?: React.ReactNode;
+  variant?: 'default' | 'elevated' | 'bordered';
 }
 
 export default function Card({ 
   title, 
+  subtitle,
   children, 
   className = "", 
-  variant = "default",
+  padding = 'md',
   footer,
-  headerAction
+  headerAction,
+  hover = true,
+  variant = 'default'
 }: CardProps) {
-  const variantStyles = {
-    default: "bg-white border border-gray-200",
-    gradient: "bg-gradient-to-br from-white to-purple-50/50 border border-purple-100",
-    bordered: "bg-white border-2 border-indigo-200"
+  const paddingStyles = {
+    sm: 'p-4',
+    md: 'p-6',
+    lg: 'p-8'
   };
 
+  const variantStyles = {
+    default: 'bg-white border border-gray-200 shadow-soft',
+    elevated: 'bg-white border border-gray-200 shadow-medium',
+    bordered: 'bg-white border-2 border-gray-300'
+  };
+
+  const hoverStyles = hover ? 'hover:shadow-medium hover:-translate-y-0.5' : '';
+
   return (
-    <div className={`rounded-xl shadow-md overflow-hidden ${variantStyles[variant]} ${className}`}>
-      {title && (
-        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+    <div className={`
+      rounded-xl transition-all duration-200
+      ${variantStyles[variant]}
+      ${hoverStyles}
+      ${className}
+    `}>
+      {(title || subtitle || headerAction) && (
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            {title && (
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                {title}
+              </h3>
+            )}
+            {subtitle && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {subtitle}
+              </p>
+            )}
+          </div>
           {headerAction && <div>{headerAction}</div>}
         </div>
       )}
-      <div className="p-6">
+      
+      <div className={paddingStyles[padding]}>
         {children}
       </div>
+
       {footer && (
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           {footer}
         </div>
       )}

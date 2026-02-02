@@ -12,18 +12,6 @@ export default function Header() {
   const auth = useAuth();
   const ui = useUI();
 
-  // Apply theme to <html> for better Tailwind/Next.js compatibility
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const html = document.documentElement;
-      if (ui.theme === "dark") {
-        html.classList.add("dark");
-      } else {
-        html.classList.remove("dark");
-      }
-    }
-  }, [ui.theme]);
-
   // Close profile card on outside click
   React.useEffect(() => {
     function handleProfileClick(e: MouseEvent) {
@@ -76,6 +64,8 @@ export default function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             <Link href="/" className="text-white hover:text-purple-200 transition-colors font-medium">Home</Link>
             <Link href="/dashboard" className="text-white hover:text-purple-200 transition-colors font-medium">Dashboard</Link>
+            <Link href="/student-progress" className="text-white hover:text-purple-200 transition-colors font-medium">Student Progress</Link>
+            <Link href="/peer-feedback" className="text-white hover:text-purple-200 transition-colors font-medium">Peer Feedback</Link>
             <Link href="/users" className="text-white hover:text-purple-200 transition-colors font-medium">Team Members</Link>
             <Link href="/profile" className="text-white hover:text-purple-200 transition-colors font-medium">Profile</Link>
           </nav>
@@ -141,9 +131,9 @@ export default function Header() {
                     <div id="profile-card-dropdown" className="absolute right-0 mt-2 w-80 bg-white text-gray-900 rounded-xl shadow-2xl border border-purple-100 z-50 animate-fade-in">
                       <div className="flex flex-col items-center p-6">
                         <div className="w-16 h-16 rounded-full bg-linear-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold mb-2">
-                          {auth.userName ? auth.userName[0].toUpperCase() : "U"}
+                          {auth.user?.name ? auth.user.name[0].toUpperCase() : "U"}
                         </div>
-                        <h2 className="text-xl font-bold text-indigo-700 mb-1">{auth.userName}</h2>
+                        <h2 className="text-xl font-bold text-indigo-700 mb-1">{auth.user?.name}</h2>
                         <p className="text-sm text-gray-500 mb-4">Role: Developer</p>
                         <div className="grid grid-cols-2 gap-4 w-full mb-4">
                           <div className="bg-purple-50 rounded-lg p-3 text-center">
@@ -193,6 +183,8 @@ export default function Header() {
             <div className="flex flex-col space-y-3">
               <Link href="/" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Home</Link>
               <Link href="/dashboard" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Dashboard</Link>
+              <Link href="/student-progress" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Student Progress</Link>
+              <Link href="/peer-feedback" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Peer Feedback</Link>
               <Link href="/users" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Team Members</Link>
               <Link href="/profile" className="text-white hover:text-purple-200 transition-colors font-medium py-2">Profile</Link>
               {/* Theme Toggle Button (Mobile) */}
@@ -206,7 +198,7 @@ export default function Header() {
               {/* Auth State UI (Mobile) */}
               {auth.isLoggedIn ? (
                 <>
-                  <span className="font-semibold">Hello, {auth.userName}</span>
+                  <span className="font-semibold">Hello, {auth.user?.name}</span>
                   <button
                     className="mt-2 px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors"
                     onClick={auth.logout}

@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { isLoggedIn, isLoading, user } = useAuthContext();
+  const { isLoggedIn, isLoading } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {

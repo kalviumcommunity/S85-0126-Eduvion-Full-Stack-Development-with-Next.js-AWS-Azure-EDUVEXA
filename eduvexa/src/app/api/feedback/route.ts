@@ -1,0 +1,187 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getUserFromRequest } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+const feedbackSchema = z.object({
+  toUserId: z.string().min(1, "Recipient is required"),
+  rating: z.number().min(1).max(5, "Rating must be between 1 and 5"),
+  comment: z.string().min(10, "Comment must be at least 10 characters"),
+  category: z.string().min(1, "Category is required"),
+  strengths: z.string().optional(),
+  improvements: z.string().optional(),
+});
+
+// POST /api/feedback - Create new feedback
+export async function POST(req: NextRequest) {
+  try {
+    // Get user from request
+    const user = await getUserFromRequest(req);
+    
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    
+    // Validate input
+    const validatedData = feedbackSchema.parse(body);
+
+    // Check if user is trying to give feedback to themselves
+    if (Number(validatedData.toUserId) === user.id) {
+      return NextResponse.json(
+        { success: false, error: "Cannot give feedback to yourself" },
+        { status: 400 }
+      );
+    }
+
+    // Create feedback
+    const toUserId = Number(validatedData.toUserId);
+    const feedback = await prisma.feedback.create({
+      data: {
+        fromUserId: user.id,
+        toUserId,
+        rating: Number(validatedData.rating),
+        comment: validatedData.comment,
+        category: validatedData.category,
+      },
+      include: {
+        fromUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        toUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        userId: user.id,
+        action: "feedback_given",
+        metadata: {
+          feedbackId: feedback.id,
+          toUserId: validatedData.toUserId,
+          rating: validatedData.rating,
+          category: validatedData.category,
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Feedback submitted successfully",
+      data: { feedback },
+    });
+  } catch (error) {
+    console.error("Create feedback error:", error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "Validation failed",
+          details: error.issues.map((e: any) => ({ field: e.path[0], message: e.message }))
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// GET /api/feedback - Get feedback for a user
+export async function GET(req: NextRequest) {
+  try {
+    // Get user from request
+    const user = await getUserFromRequest(req);
+    
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const type = searchParams.get("type") || "received"; // "given" or "received"
+    const userId = searchParams.get("userId") || user.id;
+
+    const where = type === "given" 
+      ? { fromUserId: user.id }
+      : { toUserId: userId };
+
+    const feedback = await prisma.feedback.findMany({
+      where,
+      include: {
+        fromUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        toUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // Get feedback statistics
+    const stats = await prisma.feedback.groupBy({
+      by: ['rating'],
+      where: type === "given" ? { fromUserId: user.id } : { toUserId: userId },
+      _count: {
+        id: true,
+      },
+    });
+
+    const totalFeedback = feedback.length;
+    const averageRating = stats.reduce((sum, stat) => sum + (stat.rating * stat._count.id), 0) / totalFeedback || 0;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        feedback,
+        stats: {
+          total: totalFeedback,
+          averageRating: Math.round(averageRating * 10) / 10,
+          ratingDistribution: stats,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get feedback error:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

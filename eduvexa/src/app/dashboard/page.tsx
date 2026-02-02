@@ -1,250 +1,319 @@
 "use client";
 
-import { Card, StatCard, Badge } from "@/components";
-                      import { useState } from "react";
-                      import { hasPermission } from "@/lib/rbacConfig";
-                      import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { 
+  Clock, 
+  CheckCircle, 
+  TrendingUp, 
+  Users, 
+  CheckSquare,
+  Plus,
+  User,
+  Activity,
+  Star,
+  Target
+} from "lucide-react";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
 
-                      function WeeklyActivityDashboard() {
-                        const data = [
-                          { day: "Monday", value: 4200, details: "High productivity, 5 tasks completed." },
-                          { day: "Tuesday", value: 3600, details: "Team meeting, 4 tasks completed." },
-                          { day: "Wednesday", value: 3800, details: "Client call, 6 tasks completed." },
-                          { day: "Thursday", value: 3800, details: "Code review, 5 tasks completed." },
-                          { day: "Friday", value: 3600, details: "Documentation, 3 tasks completed." },
-                          { day: "Saturday", value: 3200, details: "Bug fixes, 2 tasks completed." },
-                          { day: "Sunday", value: 2900, details: "Planning, 1 task completed." },
-                        ];
-                        const max = Math.max(...data.map(d => d.value));
-                        const [selected, setSelected] = useState<number | null>(null);
+interface DashboardData {
+  stats: {
+    totalTasks: number;
+    completedTasks: number;
+    inProgressTasks: number;
+    ownedProjects: number;
+    feedbackGiven: number;
+    feedbackReceived: number;
+    averageRating: number;
+    engagementScore: number;
+  };
+  recentActivity: Array<{
+    id: number;
+    action: string;
+    createdAt: string;
+    metadata?: any;
+  }>;
+  recentTasks: Array<{
+    id: number;
+    title: string;
+    status: string;
+    project: {
+      title: string;
+    };
+  }>;
+}
 
-                        return (
-                          <div className="bg-white rounded-xl shadow-lg p-6">
-                            <div className="relative w-full h-64">
-                              <svg viewBox="0 0 700 260" className="absolute left-0 top-0 w-full h-full">
-                                {/* Grid lines and y-axis ticks */}
-                                {Array.from({ length: 6 }).map((_, i) => {
-                                  const y = 40 + i * 36;
-                                  const value = 5200 - i * 800;
-                                  return (
-                                    <g key={i}>
-                                      <line x1="60" x2="680" y1={y} y2={y} stroke="#e5e7eb" strokeDasharray="4 4" />
-                                      <text x="50" y={y + 5} fontSize="12" fill="#9ca3af" textAnchor="end">{value}</text>
-                                    </g>
-                                  );
-                                })}
-                                {/* Bars */}
-                                {data.map((item, i) => {
-                                  const barHeight = ((item.value / max) * 180) || 2;
-                                  const y = 220 - barHeight;
-                                  const x = 70 + i * 85;
-                                  const isActive = selected === i;
-                                  return (
-                                    <g key={item.day}>
-                                      <rect
-                                        x={x}
-                                        y={y}
-                                        width="50"
-                                        height={barHeight}
-                                        fill={isActive ? "#14b8a6" : "#38bdf8"}
-                                        opacity={isActive ? "0.9" : "0.7"}
-                                        rx="4"
-                                        style={{ cursor: "pointer", transition: "fill 0.2s" }}
-                                        onClick={() => setSelected(isActive ? null : i)}
-                                      />
-                                      {/* Value label on top of bar */}
-                                      <text
-                                        x={x + 25}
-                                        y={y - 10}
-                                        fontSize="13"
-                                        fill={isActive ? "#14b8a6" : "#38bdf8"}
-                                        textAnchor="middle"
-                                        fontWeight="bold"
-                                      >
-                                        {item.value}
-                                      </text>
-                                    </g>
-                                  );
-                                })}
-                                {/* X-axis labels */}
-                                {data.map((item, i) => (
-                                  <text
-                                    key={item.day}
-                                    x={95 + i * 85}
-                                    y={245}
-                                    fontSize="13"
-                                    fill="#6b7280"
-                                    textAnchor="middle"
-                                    transform={`rotate(-25,${95 + i * 85},245)`}
-                                  >
-                                    {item.day}
-                                  </text>
-                                ))}
-                                {/* Y-axis label */}
-                                <text x="20" y="20" fontSize="13" fill="#9ca3af">Revenues</text>
-                              </svg>
-                            </div>
-                            {/* Details below chart */}
-                            {selected !== null && (
-                              <div className="mt-6 p-4 bg-cyan-50 rounded-lg border border-cyan-200 text-cyan-900 shadow">
-                                <span className="font-semibold">{data[selected].day}:</span> {data[selected].details}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }
+export default function Dashboard() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-                      export default function DashboardPage() {
-                        const { user } = useAuth();
-                        return (
-                          <div className="space-y-8">
-                            {/* Role Banner - shows difference between ADMIN and normal user */}
-                            {user && (
-                              <div className="mb-6">
-                                <div className="px-4 py-2 rounded-lg font-semibold text-white"
-                                  style={{ background: user.role === "ADMIN" ? "#4f46e5" : user.role === "editor" ? "#6366f1" : "#64748b" }}>
-                                  {user.role === "ADMIN"
-                                    ? "You are logged in as: ADMIN (Full Access)"
-                                    : user.role === "editor"
-                                    ? "You are logged in as: Editor (Limited Access)"
-                                    : "You are logged in as: Viewer (Read Only)"}
-                                </div>
-                              </div>
-                            )}
-                            {/* Page Header */}
-                            <div>
-                              <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-                              <p className="text-gray-600">Overview of your work activities and performance metrics</p>
-                            </div>
-                            {/* Performance Metrics */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                              <StatCard
-                                title="Hours This Week"
-                                value="38.5h"
-                                icon={
-                                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                }
-                                trend={{ value: 15, isPositive: true }}
-                                color="indigo"
-                              />
-                              <StatCard
-                                title="Tasks Completed"
-                                value="24"
-                                icon={
-                                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                }
-                                trend={{ value: 20, isPositive: true }}
-                                color="green"
-                              />
-                              <StatCard
-                                title="Productivity Score"
-                                value="94%"
-                                icon={
-                                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                  </svg>
-                                }
-                                trend={{ value: 5, isPositive: true }}
-                                color="purple"
-                              />
-                              <StatCard
-                                title="Pending Reviews"
-                                value="3"
-                                icon={
-                                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                  </svg>
-                                }
-                                trend={{ value: 2, isPositive: false }}
-                                color="yellow"
-                              />
-                            </div>
-                            {/* Today's Schedule & Task Distribution */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                              {/* Today's Schedule */}
-                              <Card title="Today's Schedule" variant="gradient">
-                                <div className="space-y-3">
-                                  {([
-                                    { time: "09:00 AM", task: "Team Standup Meeting", duration: "30 min", type: "meeting" },
-                                    { time: "10:00 AM", task: "Complete API Documentation", duration: "2 hours", type: "development" },
-                                    { time: "01:00 PM", task: "Code Review Session", duration: "1 hour", type: "review" },
-                                    { time: "03:00 PM", task: "Client Presentation", duration: "45 min", type: "meeting" },
-                                    { time: "04:30 PM", task: "Bug Fixes & Testing", duration: "1.5 hours", type: "development" },
-                                  ]).map((item, index) => (
-                                    <div key={index} className="flex items-center gap-4 p-3 bg-white rounded-lg border border-gray-100">
-                                      <div className="flex-shrink-0 w-20 text-sm font-semibold text-indigo-600">
-                                        {item.time}
-                                      </div>
-                                      <div className="flex-1">
-                                        <p className="font-medium text-gray-900">{item.task}</p>
-                                        <p className="text-xs text-gray-500">{item.duration}</p>
-                                      </div>
-                                      <Badge 
-                                        label={item.type} 
-                                        variant={item.type === 'meeting' ? 'info' : item.type === 'review' ? 'warning' : 'success'} 
-                                        size="sm" 
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              </Card>
-                              {/* Task Distribution */}
-                              <Card title="Task Distribution" variant="bordered">
-                                <div className="space-y-4">
-                                  {([
-                                    { category: "Development", count: 12, color: "bg-indigo-500", percentage: 40 },
-                                    { category: "Code Review", count: 5, color: "bg-purple-500", percentage: 20 },
-                                    { category: "Meetings", count: 8, color: "bg-pink-500", percentage: 25 },
-                                    { category: "Documentation", count: 4, color: "bg-green-500", percentage: 15 },
-                                  ]).map((item, index) => (
-                                    <div key={index}>
-                                      <div className="flex justify-between items-center mb-2">
-                                        <div className="flex items-center gap-2">
-                                          <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
-                                          <span className="font-medium text-gray-900">{item.category}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                          <span className="text-sm text-gray-600">{item.count} tasks</span>
-                                          <span className="text-sm font-semibold text-indigo-600">{item.percentage}%</span>
-                                        </div>
-                                      </div>
-                                      <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div 
-                                          className={`${item.color} h-2 rounded-full transition-all duration-500`}
-                                          style={{ width: `${item.percentage}%` }}
-                                        ></div>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </Card>
-                            </div>
-                            {/* Modern dashboard style with clickable bars */}
-                            <WeeklyActivityDashboard />
-                            {/* Link to Weekly Activity Page */}
-                            <div className="flex justify-center mt-12">
-                              <a
-                                href="/weekly-activity"
-                                className="inline-block px-6 py-3 bg-cyan-600 text-white font-semibold rounded-lg shadow hover:bg-cyan-700 transition"
-                              >
-                                View Full Weekly Activity Report
-                              </a>
-                            </div>
-                            {/* Create New Project Button */}
-                            {user && hasPermission(user.role, "create") && (
-                              <div className="flex justify-end mb-4">
-                                <a href="/projects/new">
-                                  <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold shadow hover:bg-indigo-700 transition">
-                                    Create New Project
-                                  </button>
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch("/api/dashboard");
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardData(data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    if (diffInHours < 48) return "Yesterday";
+    return date.toLocaleDateString();
+  };
+
+  const getEngagementColor = (score: number) => {
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const getEngagementBg = (score: number) => {
+    if (score >= 80) return "bg-green-100";
+    if (score >= 60) return "bg-yellow-100";
+    return "bg-red-100";
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-96"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-32 bg-gray-200 rounded-xl"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Dashboard
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Welcome back, {user?.name || 'User'}! Here's your learning overview.
+          </p>
+        </div>
+        <Button 
+          label="View Profile" 
+          onClick={() => router.push('/profile')}
+          variant="secondary"
+          icon={<User className="w-4 h-4" />}
+        />
+      </div>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card variant="elevated" hover={true}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Tasks</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                {dashboardData?.stats.totalTasks || 0}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <CheckSquare className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card variant="elevated" hover={true}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                {dashboardData?.stats.completedTasks || 0}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card variant="elevated" hover={true}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Progress</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                {dashboardData?.stats.inProgressTasks || 0}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <Clock className="w-6 h-6 text-yellow-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card variant="elevated" hover={true}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Engagement</p>
+              <p className={`text-2xl font-bold mt-1 ${getEngagementColor(dashboardData?.stats.engagementScore || 0)}`}>
+                {dashboardData?.stats.engagementScore || 0}%
+              </p>
+            </div>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getEngagementBg(dashboardData?.stats.engagementScore || 0)}`}>
+              <TrendingUp className={`w-6 h-6 ${getEngagementColor(dashboardData?.stats.engagementScore || 0)}`} />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Additional Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card variant="elevated" hover={true}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Projects</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                {dashboardData?.stats.ownedProjects || 0}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Target className="w-5 h-5 text-purple-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card variant="elevated" hover={true}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Feedback Given</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                {dashboardData?.stats.feedbackGiven || 0}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <Users className="w-5 h-5 text-indigo-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card variant="elevated" hover={true}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Rating</p>
+              <div className="flex items-center gap-1 mt-1">
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  {dashboardData?.stats.averageRating?.toFixed(1) || '0.0'}
+                </p>
+                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+              </div>
+            </div>
+            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <Star className="w-5 h-5 text-yellow-600" />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Recent Activity and Tasks */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card title="Recent Activity" variant="elevated">
+          <div className="space-y-4">
+            {dashboardData?.recentActivity.slice(0, 5).map((activity) => (
+              <div key={activity.id} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                    {activity.action.replace('_', ' ')}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatDate(activity.createdAt)}
+                  </p>
+                </div>
+              </div>
+            )) || (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                No recent activity
+              </p>
+            )}
+          </div>
+        </Card>
+
+        <Card title="Recent Tasks" variant="elevated">
+          <div className="space-y-4">
+            {dashboardData?.recentTasks.map((task) => (
+              <div key={task.id} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                <div className={`w-3 h-3 rounded-full ${
+                  task.status === 'COMPLETED' ? 'bg-green-500' :
+                  task.status === 'IN_PROGRESS' ? 'bg-yellow-500' : 'bg-gray-400'
+                }`} />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {task.title}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {task.project.title} • {task.status.replace('_', ' ')}
+                  </p>
+                </div>
+              </div>
+            )) || (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                No tasks assigned yet
+              </p>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <Card title="Quick Actions" variant="elevated">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Button 
+            label="Create New Task" 
+            variant="primary" 
+            fullWidth
+            icon={<Plus className="w-4 h-4" />}
+            onClick={() => router.push('/projects')}
+          />
+          <Button 
+            label="View Progress" 
+            variant="secondary" 
+            fullWidth
+            icon={<TrendingUp className="w-4 h-4" />}
+            onClick={() => router.push('/student-progress')}
+          />
+          <Button 
+            label="Team Collaboration" 
+            variant="secondary" 
+            fullWidth
+            icon={<Users className="w-4 h-4" />}
+            onClick={() => router.push('/peer-feedback')}
+          />
+        </div>
+      </Card>
+    </div>
+  );
+}

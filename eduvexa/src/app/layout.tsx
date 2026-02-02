@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { LayoutWrapper } from "@/components";
 import { AuthProvider } from "../context/AuthContext";
 import { UIProvider } from "../context/UIContext";
-import ThemedBody from "./themed-body";
-import ToastProvider from "@/components/ui/ToastProvider";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ToastProvider } from "@/components/ui/Toast";
 import GlobalErrorBoundary from "@/components/error/GlobalErrorBoundary";
+import AppLayoutWithSidebar from "@/components/layout/AppLayoutWithSidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,14 +24,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <GlobalErrorBoundary>
-          <AuthProvider>
-            <UIProvider>
-              <ThemedBody>
-                <LayoutWrapper>{children}</LayoutWrapper>
-                <ToastProvider />
-              </ThemedBody>
-            </UIProvider>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <UIProvider>
+                <ToastProvider>
+                  <AppLayoutWithSidebar>
+                    {children}
+                  </AppLayoutWithSidebar>
+                </ToastProvider>
+              </UIProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </GlobalErrorBoundary>
       </body>
     </html>
