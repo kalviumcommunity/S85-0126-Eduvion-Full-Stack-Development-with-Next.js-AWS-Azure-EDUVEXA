@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserFromRequest } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const feedbackSchema = z.object({
   toUserId: z.string().min(1, "Recipient is required"),
@@ -14,11 +15,14 @@ const feedbackSchema = z.object({
 
 // POST /api/feedback - Create new feedback
 export async function POST(req: NextRequest) {
+  const { requestId, startTime } = logger.createRequestContext();
+  
   try {
     // Get user from request
     const user = await getUserFromRequest(req);
     
     if (!user) {
+      logger.logApiError('POST', '/api/feedback', requestId, 'Not authenticated', { userId: user?.id });
       return NextResponse.json(
         { success: false, error: "Not authenticated" },
         { status: 401 }
@@ -27,11 +31,22 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     
+    // Log API request
+    logger.logApiRequest('POST', '/api/feedback', requestId, user.id.toString(), { 
+      toUserId: body.toUserId,
+      rating: body.rating,
+      category: body.category 
+    });
+    
     // Validate input
     const validatedData = feedbackSchema.parse(body);
 
     // Check if user is trying to give feedback to themselves
     if (Number(validatedData.toUserId) === user.id) {
+      logger.logApiError('POST', '/api/feedback', requestId, 'Cannot give feedback to yourself', { 
+        userId: user.id,
+        toUserId: validatedData.toUserId 
+      });
       return NextResponse.json(
         { success: false, error: "Cannot give feedback to yourself" },
         { status: 400 }
@@ -40,6 +55,14 @@ export async function POST(req: NextRequest) {
 
     // Create feedback
     const toUserId = Number(validatedData.toUserId);
+    
+    logger.logDatabaseOperation('create', 'feedback', requestId, user.id.toString(), {
+      fromUserId: user.id,
+      toUserId,
+      rating: validatedData.rating,
+      category: validatedData.category
+    });
+    
     const feedback = await prisma.feedback.create({
       data: {
         fromUserId: user.id,
@@ -69,6 +92,15 @@ export async function POST(req: NextRequest) {
     });
 
     // Log activity
+    logger.logDatabaseOperation('create', 'activityLog', requestId, user.id.toString(), {
+      userId: user.id,
+      action: "feedback_given",
+      feedbackId: feedback.id,
+      toUserId: validatedData.toUserId,
+      rating: validatedData.rating,
+      category: validatedData.category,
+    });
+    
     await prisma.activityLog.create({
       data: {
         userId: user.id,
@@ -82,13 +114,20 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const responseTime = logger.getResponseTime(startTime);
+    logger.logApiSuccess('POST', '/api/feedback', requestId, responseTime, {
+      feedbackId: feedback.id,
+      toUserId: validatedData.toUserId
+    });
+
     return NextResponse.json({
       success: true,
       message: "Feedback submitted successfully",
       data: { feedback },
     });
   } catch (error) {
-    console.error("Create feedback error:", error);
+    const responseTime = logger.getResponseTime(startTime);
+    logger.logApiError('POST', '/api/feedback', requestId, error, { responseTime });
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -110,11 +149,14 @@ export async function POST(req: NextRequest) {
 
 // GET /api/feedback - Get feedback for a user
 export async function GET(req: NextRequest) {
+  const { requestId, startTime } = logger.createRequestContext();
+  
   try {
     // Get user from request
     const user = await getUserFromRequest(req);
     
     if (!user) {
+      logger.logApiError('GET', '/api/feedback', requestId, 'Not authenticated');
       return NextResponse.json(
         { success: false, error: "Not authenticated" },
         { status: 401 }
@@ -125,10 +167,22 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get("type") || "received"; // "given" or "received"
     const userId = searchParams.get("userId") || user.id;
 
+    // Log API request
+    logger.logApiRequest('GET', '/api/feedback', requestId, user.id.toString(), { 
+      type,
+      userId 
+    });
+
     const where = type === "given" 
       ? { fromUserId: user.id }
       : { toUserId: userId };
 
+    logger.logDatabaseOperation('findMany', 'feedback', requestId, user.id.toString(), { 
+      type,
+      userId,
+      where 
+    });
+    
     const feedback = await prisma.feedback.findMany({
       where,
       include: {
@@ -155,6 +209,11 @@ export async function GET(req: NextRequest) {
     });
 
     // Get feedback statistics
+    logger.logDatabaseOperation('groupBy', 'feedback', requestId, user.id.toString(), { 
+      type,
+      userId 
+    });
+    
     const stats = await prisma.feedback.groupBy({
       by: ['rating'],
       where: type === "given" ? { fromUserId: user.id } : { toUserId: userId },
@@ -165,6 +224,13 @@ export async function GET(req: NextRequest) {
 
     const totalFeedback = feedback.length;
     const averageRating = stats.reduce((sum, stat) => sum + (stat.rating * stat._count.id), 0) / totalFeedback || 0;
+
+    const responseTime = logger.getResponseTime(startTime);
+    logger.logApiSuccess('GET', '/api/feedback', requestId, responseTime, {
+      totalFeedback,
+      averageRating,
+      statsCount: stats.length
+    });
 
     return NextResponse.json({
       success: true,
@@ -178,7 +244,9 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Get feedback error:", error);
+    const responseTime = logger.getResponseTime(startTime);
+    logger.logApiError('GET', '/api/feedback', requestId, error, { responseTime });
+    
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
