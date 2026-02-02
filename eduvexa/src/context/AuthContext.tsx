@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         // Redirect to dashboard or intended page
         const urlParams = new URLSearchParams(window.location.search);
-        const redirect = urlParams.get('redirect') || '/dashboard';
+        const redirect = urlParams.get('redirect') || '/';
         router.push(redirect);
         
         return { success: true };
@@ -115,8 +115,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(data.user);
         setIsLoggedIn(true);
         
-        // Redirect to dashboard
-        router.push('/dashboard');
+        // OWASP: Redirect to login page after signup for explicit authentication
+        router.push('/login');
         
         return { success: true };
       } else {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, generateToken, setAuthCookie } from "@/lib/auth";
+// OWASP: Import input sanitization utility
+import { sanitizeInput } from "@/lib/sanitizeInput";
 import { z } from "zod";
 
 const signupSchema = z.object({
@@ -16,7 +18,11 @@ export async function POST(req: NextRequest) {
     
     // Validate input
     const validatedData = signupSchema.parse(body);
-    const { name, email, password, role } = validatedData;
+    // OWASP: Sanitize user-controlled input before saving to DB
+    const name = sanitizeInput(validatedData.name);
+    const email = sanitizeInput(validatedData.email);
+    const password = validatedData.password; // Passwords should not be sanitized
+    const role = validatedData.role;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
