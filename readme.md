@@ -50,6 +50,167 @@ EDUVEXA is a modern, full-stack educational collaboration platform designed to i
    npm run dev
    ```
 
+## 🧪 Testing
+
+EDUVEXA includes a comprehensive testing setup using Jest and React Testing Library.
+
+### Testing Setup
+
+- **Jest**: Test runner with coverage reporting
+- **React Testing Library**: Component testing utilities
+- **User Event**: Advanced user interaction simulation
+- **TypeScript**: Full TypeScript support
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run specific test file
+npm test __tests__/utils.test.ts
+```
+
+### Test Structure
+
+```
+__tests__/
+├── utils.test.ts          # Utility function tests
+├── Button.test.tsx        # Component tests
+└── ProfessionalSidebar.test.tsx  # Complex component tests
+```
+
+### Coverage Configuration
+
+The test suite is configured with coverage thresholds:
+- **Statements**: 80%
+- **Branches**: 80%
+- **Functions**: 80%
+- **Lines**: 80%
+
+Coverage reports are generated in the `coverage/` directory.
+
+### Sample Test Output
+
+```
+ PASS  __tests__/utils.test.ts
+  Utility Functions
+    sum
+      ✓ should add two positive numbers correctly (3 ms)
+      ✓ should handle negative numbers
+      ✓ should handle zero
+      ✓ should handle decimal numbers
+    isValidEmail
+      ✓ should validate correct email addresses (4 ms)
+      ✓ should reject invalid email addresses
+      ✓ should reject emails with spaces (1 ms)
+    capitalize
+      ✓ should capitalize first letter of a string (3 ms)
+      ✓ should handle empty string (1 ms)
+      ✓ should handle single character (1 ms)
+      ✓ should handle strings with spaces
+
+Test Suites: 1 passed, 1 total
+Tests:       11 passed, 11 total
+```
+
+### CI/CD Integration
+
+The project includes automated testing through GitHub Actions:
+
+- **Unit Tests**: Run on every push and pull request
+- **Coverage Reports**: Automatically uploaded to Codecov
+- **Security Audits**: Automated vulnerability scanning
+- **Multi-node Testing**: Tests run on Node.js 18.x and 20.x
+
+### Writing Tests
+
+#### Utility Function Example
+```typescript
+// src/utils/helpers.ts
+export const sum = (a: number, b: number): number => a + b;
+
+// __tests__/utils.test.ts
+import { sum } from '../src/utils/helpers';
+
+test('adds two numbers', () => {
+  expect(sum(2, 3)).toBe(5);
+});
+```
+
+#### Component Example
+```typescript
+// __tests__/Button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import Button from '../src/components/ui/Button';
+
+test('renders button and responds to click', async () => {
+  const handleClick = jest.fn();
+  render(<Button label="Click Me" onClick={handleClick} />);
+  
+  const button = screen.getByRole('button', { name: 'Click Me' });
+  await userEvent.click(button);
+  
+  expect(handleClick).toHaveBeenCalledTimes(1);
+});
+```
+
+### Best Practices
+
+1. **Test Behavior, Not Implementation**: Focus on what users see and do
+2. **Use Meaningful Assertions**: Test user-visible outcomes
+3. **Mock External Dependencies**: Isolate components from external services
+4. **Maintain High Coverage**: Aim for 80%+ coverage across all metrics
+5. **Write Descriptive Tests**: Clear test names that explain the behavior
+
+### Testing Pyramid
+
+```
+    /\
+   /  \  E2E Tests (Cypress/Playwright)
+  /____\
+ /      \ Integration Tests
+/________\
+Unit Tests (Jest + RTL) - Fast, Isolated, Comprehensive
+```
+
+- **Unit Tests**: Fast, isolated tests for individual functions/components
+- **Integration Tests**: Test how modules work together
+- **E2E Tests**: Full user workflows in a real browser
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Jest DOM Matchers Not Found**
+   ```bash
+   npm install --save-dev @testing-library/jest-dom
+   ```
+
+2. **Module Resolution Errors**
+   - Check `jest.config.js` `moduleNameMapper` configuration
+   - Ensure TypeScript paths are properly mapped
+
+3. **Coverage Threshold Failures**
+   - Write more tests for uncovered code
+   - Adjust thresholds in `jest.config.js` if necessary
+
+#### Debugging Tests
+
+```bash
+# Run tests with debugger
+node --inspect-brk node_modules/.bin/jest --runInBand
+
+# Run specific test in debug mode
+node --inspect-brk node_modules/.bin/jest __tests__/utils.test.ts --runInBand
+```
+
 6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
