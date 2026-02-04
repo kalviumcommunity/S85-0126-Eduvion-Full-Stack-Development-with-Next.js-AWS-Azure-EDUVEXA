@@ -1,5 +1,3 @@
-// OWASP: Input sanitization utility using sanitize-html
-// This function should be used to sanitize all user-controlled input before saving to the database.
 import sanitizeHtml from 'sanitize-html';
 
 /**
