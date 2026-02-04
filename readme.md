@@ -27,10 +27,16 @@ EDUVEXA is a modern, full-stack educational collaboration platform designed to i
    cp .env.example .env.local
    ```
    
-   Configure your database URL in `.env.local`:
+   Configure your database URL and AWS S3 credentials in `.env.local`:
    ```bash
    DATABASE_URL="postgresql://username:password@localhost:5432/eduvexa"
    JWT_SECRET="your-secret-key-here"
+   
+   # AWS S3 Configuration (for file uploads)
+   AWS_ACCESS_KEY_ID="your-access-key"
+   AWS_SECRET_ACCESS_KEY="your-secret-key"
+   AWS_REGION="ap-south-1"
+   AWS_BUCKET_NAME="your-bucket-name"
    ```
 
 4. **Set up the database**
@@ -230,7 +236,8 @@ After seeding the database, you can use these test accounts:
 - **🤝 Peer Feedback System** - Structured reviews with ratings and comments
 - **👥 Team Management** - User profiles, search, and statistics
 - **🚀 Project Management** - Task tracking with progress visualization
-- **🔐 Secure Authentication** - JWT-based auth with role-based access control
+- **� Secure File Uploads** - Direct S3 uploads with pre-signed URLs, no credential exposure
+- **�🔐 Secure Authentication** - JWT-based auth with role-based access control
 - **🎨 Modern UI/UX** - Dark mode, responsive design, and smooth animations
 
 ## �️ Tech Stack
@@ -249,6 +256,9 @@ EDUVEXA/
 │   ├── src/
 │   │   ├── app/               # App Router pages
 │   │   │   ├── api/          # API routes
+   │   │   │   ├── upload/   # File upload pre-signed URL generation
+   │   │   │   ├── files/    # File metadata storage & retrieval
+   │   │   │   ├── auth/     # Authentication
 │   │   │   ├── dashboard/    # Dashboard page
 │   │   │   ├── profile/      # Profile page
 │   │   │   ├── users/        # Team members page
@@ -274,10 +284,36 @@ By working on EDUVEXA, developers gain hands-on experience with:
 - TypeScript for type safety
 - Prisma ORM for database operations
 - JWT authentication and security best practices
+- Secure file uploads with AWS S3 pre-signed URLs
 - Modern React patterns (Context, Hooks, Forms)
 - Responsive design with Tailwind CSS
 - Database design and relationships
 - API development with Next.js API routes
+
+## 📤 File Upload System
+
+EDUVEXA includes a secure file upload system using AWS S3 pre-signed URLs:
+
+**Features:**
+- Direct client-to-S3 uploads (no server overhead)
+- Temporary signed URLs (60-second expiry)
+- File type and size validation
+- Database tracking with metadata
+- Support for project-based file organization
+- Lifecycle policies for automatic cleanup
+
+**Quick Setup:**
+1. Create AWS S3 bucket and IAM credentials
+2. Set environment variables (see above)
+3. Use `<FileUpload />` component in your pages
+
+**Documentation:**
+For detailed setup, API endpoints, testing, and security best practices, see [FILE_UPLOAD_API_GUIDE.md](FILE_UPLOAD_API_GUIDE.md)
+
+**API Endpoints:**
+- `POST /api/upload` - Generate pre-signed URL
+- `POST /api/files` - Store file metadata
+- `GET /api/files` - Retrieve files with filtering
 
 ---
 
