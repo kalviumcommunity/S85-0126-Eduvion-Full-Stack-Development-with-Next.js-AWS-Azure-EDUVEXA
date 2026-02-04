@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoggedIn(true);
         
         // OWASP: Redirect to login page after signup for explicit authentication
-        router.push('/login');
+        router.push('/');
         
         return { success: true };
       } else {
