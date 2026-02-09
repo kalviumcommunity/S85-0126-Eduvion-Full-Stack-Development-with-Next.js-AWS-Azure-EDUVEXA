@@ -9,6 +9,7 @@ import CleanCard from "@/components/ui/CleanCard";
 import FormInput from "@/components/ui/FormInput";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
+import Image from "next/image";
 
 const signupSchema = z
   .object({
@@ -16,7 +17,6 @@ const signupSchema = z
     email: z.string().min(1, "Email is required").email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Please confirm your password"),
-    role: z.enum(["STUDENT", "INSTRUCTOR"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -36,16 +36,16 @@ export default function SignupPage() {
     // Add confirmPassword to defaultValues
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "", role: "STUDENT" },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
   const onSubmit = async (data: SignupFormData) => {
-    // Remove confirmPassword before sending
+    // Remove confirmPassword before sending, set role as STUDENT by default
     const result = await signup({
       name: data.name,
       email: data.email,
       password: data.password,
-      role: data.role,
+      role: "STUDENT",
     });
     if (!result.success) {
       setError("root", { message: result.error });
@@ -57,19 +57,20 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
   return (
-    <div className="max-w-md">
-      <CleanCard>
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Create account
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Join EDUVEXA to track your progress
-            </p>
+    // <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e0e7ff] via-[#f3e8ff] to-[#c7d2fe] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-2">
+      <div className="backdrop-blur-2xl bg-white/60 dark:bg-gray-900/70 shadow-2xl rounded-[2.5rem] border border-gray-100 dark:border-gray-800 p-10 w-full max-w-md mx-auto relative overflow-hidden ring-1 ring-purple-100 dark:ring-purple-900/30">
+        {/* Animated gradient accent */}
+        <div className="absolute -top-16 -right-16 w-56 h-56 bg-gradient-to-br from-purple-400/40 via-blue-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse z-0" />
+        <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-gradient-to-tr from-pink-400/30 via-blue-400/20 to-purple-400/20 rounded-full blur-2xl animate-pulse z-0" />
+        <div className="relative z-10 space-y-12">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight drop-shadow-lg bg-gradient-to-r from-purple-600 via-blue-500 to-pink-500 bg-clip-text text-transparent">Create your EDUVEXA account</h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">Join EDUVEXA to track your progress</p>
           </div>
 
-          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+
+
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <FormInput
               label="Full Name"
               type="text"
@@ -84,62 +85,21 @@ export default function SignupPage() {
               {...register("email")}
               error={errors.email?.message}
             />
-            <div className="relative">
-              <FormInput
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                placeholder="********"
-                {...register("password")}
-                error={errors.password?.message}
-              />
-              <button
-                type="button"
-                tabIndex={-1}
-                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675m2.122 2.122A9.956 9.956 0 002 9c0 5.523 4.477 10 10 10 1.657 0 3.234-.336 4.675-.938m2.122-2.122A9.956 9.956 0 0022 15c0-5.523-4.477-10-10-10-1.657 0-3.234.336-4.675.938" /></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" /></svg>
-                )}
-              </button>
-            </div>
-            <div className="relative">
-              <FormInput
-                label="Confirm Password"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="********"
-                {...register("confirmPassword")}
-                error={errors.confirmPassword?.message}
-              />
-              <button
-                type="button"
-                tabIndex={-1}
-                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                onClick={() => setShowConfirmPassword((v) => !v)}
-                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-              >
-                {showConfirmPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675m2.122 2.122A9.956 9.956 0 002 9c0 5.523 4.477 10 10 10 1.657 0 3.234-.336 4.675-.938m2.122-2.122A9.956 9.956 0 0022 15c0-5.523-4.477-10-10-10-1.657 0-3.234.336-4.675.938" /></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" /></svg>
-                )}
-              </button>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Role
-              </label>
-              <select
-                {...register("role")}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
-              >
-                <option value="STUDENT">Student</option>
-                <option value="INSTRUCTOR">Instructor</option>
-              </select>
-            </div>
+            <FormInput
+              label="Password"
+              type="password"
+              placeholder="********"
+              {...register("password")}
+              error={errors.password?.message}
+            />
+            <FormInput
+              label="Confirm Password"
+              type="password"
+              placeholder="********"
+              {...register("confirmPassword")}
+              error={errors.confirmPassword?.message}
+            />
+
 
             {errors.root?.message && (
               <p className="text-sm text-red-500">{errors.root.message}</p>
@@ -153,19 +113,42 @@ export default function SignupPage() {
               disabled={isSubmitting}
               loading={isSubmitting}
             />
+          <div className="flex items-center gap-2 my-6">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent dark:via-purple-800" />
+            <span className="text-xs text-purple-500 dark:text-purple-300 font-bold tracking-widest drop-shadow">OR</span>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent via-purple-300 to-transparent dark:via-purple-800" />
+          </div>
+          <div className="flex flex-row gap-4">
+            <button
+              type="button"
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-2xl bg-white/90 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition font-bold text-gray-800 dark:text-gray-100 text-base group min-w-0 backdrop-blur-sm"
+              // onClick={handleGoogleSignup}
+            >
+              <span className="bg-white rounded-full p-1 border border-gray-200 group-hover:scale-110 transition"><Image src="/google.svg" alt="Google" width={22} height={22} /></span>
+              <span className="ml-1 truncate">Google</span>
+            </button>
+            <button
+              type="button"
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-2xl bg-gradient-to-r from-[#1877F3] to-[#145db2] hover:from-[#145db2] hover:to-[#1877F3] transition font-bold text-white text-base shadow-xl min-w-0 backdrop-blur-sm"
+              // onClick={handleFacebookSignup}
+            >
+              <span className="bg-white rounded-full p-1"><Image src="/facebook.svg" alt="Facebook" width={22} height={22} /></span>
+              <span className="ml-1 truncate">Facebook</span>
+            </button>
+          </div>
           </form>
 
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-blue-600 dark:text-blue-400 font-semibold transition-colors duration-200 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 hover:px-2 hover:py-1 hover:rounded-lg hover:shadow-lg hover:underline"
             >
               Sign in
             </Link>
           </div>
         </div>
-      </CleanCard>
-    </div>
+      </div>
+    // </div>
   );
 }
