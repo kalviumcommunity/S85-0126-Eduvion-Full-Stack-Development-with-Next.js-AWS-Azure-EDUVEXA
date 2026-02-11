@@ -8,15 +8,14 @@ const nextConfig: NextConfig = {
 
   reactCompiler: true,
 
+  // External packages for server components
+  serverExternalPackages: ['sharp'],
+
   experimental: {
 
     optimizeCss: true,
 
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-
-    // Enable compression
-
-    serverComponentsExternalPackages: ['sharp'],
 
   },
 

@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -68,7 +69,7 @@ export async function getUserFromRequest(req: Request) {
 
 // Set HTTP-only cookie (NextResponse)
 export function setAuthCookie(res: Response, token: string) {
-  const response = res as { cookies: { set: (name: string, value: string, options?: object) => void } };
+  const response = res as NextResponse;
   response.cookies?.set?.("auth-token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -80,6 +81,6 @@ export function setAuthCookie(res: Response, token: string) {
 
 // Clear auth cookie
 export function clearAuthCookie(res: Response) {
-  const response = res as { cookies: { delete: (name: string) => void } };
+  const response = res as NextResponse;
   response.cookies?.delete?.("auth-token");
 }
