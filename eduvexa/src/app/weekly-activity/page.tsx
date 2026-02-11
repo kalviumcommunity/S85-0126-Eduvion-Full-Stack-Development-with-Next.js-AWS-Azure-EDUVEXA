@@ -19,7 +19,7 @@ export default function WeeklyActivityPage() {
             <div className="transition-transform hover:scale-[1.03]">
               <h2 className="text-xl font-bold text-cyan-700 mb-3 flex items-center gap-2">
                 <svg className="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m4 0v-4a2 2 0 012-2h2a2 2 0 012 2v4" /></svg>
-                Revenues
+                fetchProjects, fetchUsers2
               </h2>
               <div className="rounded-xl bg-gradient-to-br from-cyan-50 to-blue-100 shadow-lg p-4 animate-fade-in">
                 <WeeklyActivityDashboard />

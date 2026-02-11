@@ -25,32 +25,32 @@ export function AnimatedCounter({
     if (value === previousValue.current) return;
     
     setIsAnimating(true);
-    const startTime = Date.now();
     const startValue = previousValue.current;
-    const endValue = value;
-    const difference = endValue - startValue;
 
-    const animate = () => {
-      const now = Date.now();
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+    // Animate from start to end value
+    const steps = 60;
+    const increment = (value - startValue) / steps;
+    let currentValue = startValue;
+    let step = 0;
+
+    const animationInterval = setInterval(() => {
+      step++;
+      currentValue = startValue + (increment * step);
+      setDisplayValue(Math.floor(currentValue));
       
-      // Easing function (ease-out cubic)
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      
-      const currentValue = Math.floor(startValue + difference * easeOut);
-      setDisplayValue(currentValue);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
+      if (step >= steps) {
+        clearInterval(animationInterval);
+        setDisplayValue(value);
         setIsAnimating(false);
         previousValue.current = value;
       }
-    };
+    }, duration / steps);
 
-    requestAnimationFrame(animate);
-  }, [value, duration]);
+    return () => {
+      clearInterval(animationInterval);
+      setIsAnimating(false);
+    };
+  }, [value, isAnimating, duration]);
 
   return (
     <span className={`tabular-nums ${isAnimating ? 'transition-all duration-100' : ''} ${className}`}>
