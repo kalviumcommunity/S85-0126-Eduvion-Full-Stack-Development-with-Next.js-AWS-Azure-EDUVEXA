@@ -101,7 +101,6 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
-
           <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
             Don’t have an account?{" "}
             <Link
