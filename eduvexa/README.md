@@ -349,9 +349,334 @@ window.gtag('event', 'exception', {
 **Accessibility**: Full screen reader support and keyboard navigation ensure inclusive user experience.
 
 
-## Secure JWT & Session Management Implementation
+## HTTPS Enforcement & Secure Headers Implementation
 
-This project demonstrates enterprise-grade JWT-based authentication with secure session management, automatic token refresh, and protection against common security threats.
+This project demonstrates comprehensive security implementation with HTTPS enforcement, security headers, and CORS configuration to protect against common web vulnerabilities.
+
+### 🔒 Security Headers Overview
+
+| Header | Purpose | Attack Prevented | Implementation |
+|--------|---------|------------------|----------------|
+| **HSTS** | Forces HTTPS-only connections | Man-in-the-middle (MITM) attacks | `max-age=63072000; includeSubDomains; preload` |
+| **CSP** | Restricts content sources | Cross-Site Scripting (XSS) | `default-src 'self'; script-src 'self' 'unsafe-eval'` |
+| **CORS** | Controls API access | Unauthorized API access | Specific origins only (no wildcard) |
+| **X-Frame-Options** | Prevents clickjacking | Clickjacking attacks | `DENY` |
+| **X-Content-Type-Options** | Prevents MIME sniffing | Content-type attacks | `nosniff` |
+| **Referrer-Policy** | Controls referrer info | Privacy leaks | `strict-origin-when-cross-origin` |
+
+### 🛡️ Implementation Details
+
+#### 1. HTTPS Enforcement with HSTS
+
+**Configuration (`next.config.js`)**:
+```javascript
+{
+  key: 'Strict-Transport-Security',
+  value: 'max-age=63072000; includeSubDomains; preload'
+}
+```
+
+**Security Benefits**:
+- **2-year validity**: Long-term HTTPS enforcement
+- **Subdomain coverage**: Protects all subdomains
+- **Browser preload**: Eligible for HSTS preload list
+- **Automatic redirect**: Browsers force HTTPS connections
+
+#### 2. Content Security Policy (CSP)
+
+**Multi-layered Protection**:
+```javascript
+{
+  key: 'Content-Security-Policy',
+  value: [
+    "default-src 'self';",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com;",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
+    "img-src 'self' data: https:;",
+    "font-src 'self' https://fonts.gstatic.com;",
+    "connect-src 'self' https://api.github.com;",
+    "frame-src 'self';",
+    "object-src 'none';",
+    "upgrade-insecure-requests;"
+  ].join(' ')
+}
+```
+
+**Protection Against**:
+- **XSS Attacks**: Only trusted script sources
+- **Data Exfiltration**: Restricted external connections
+- **Clickjacking**: Frame source control
+- **Mixed Content**: Automatic HTTPS upgrades
+
+#### 3. CORS Configuration
+
+**API Route Security**:
+```javascript
+// Secure CORS implementation
+function setCORSHeaders(response, origin) {
+  const allowedOrigins = [
+    process.env.NODE_ENV === 'production' 
+      ? 'https://eduvexa.vercel.app' 
+      : 'http://localhost:3000'
+  ];
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+  }
+  
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+}
+```
+
+**Security Features**:
+- **Origin Whitelisting**: Only trusted domains
+- **Method Restrictions**: Limited HTTP methods
+- **Header Control**: Specific allowed headers
+- **Credentials Support**: Secure cookie handling
+
+#### 4. Additional Security Headers
+
+**Comprehensive Protection**:
+```javascript
+// Clickjacking protection
+{ key: 'X-Frame-Options', value: 'DENY' }
+
+// MIME-type protection
+{ key: 'X-Content-Type-Options', value: 'nosniff' }
+
+// Referrer control
+{ key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' }
+
+// Browser feature restrictions
+{ key: 'Permissions-Policy', 
+  value: 'camera=(), microphone=(), geolocation=()' }
+
+// Legacy XSS protection
+{ key: 'X-XSS-Protection', value: '1; mode=block' }
+```
+
+### 🔍 Security Testing & Verification
+
+#### Automated Security Testing
+
+**Security Test Page (`/security`)**:
+- **Automated Scanning**: Tests all security headers
+- **HTTPS Verification**: Confirms HTTPS enforcement
+- **CORS Testing**: Validates API CORS configuration
+- **Score Calculation**: Grades security configuration (A+ to F)
+- **Recommendations**: Specific improvement suggestions
+
+**Test Coverage**:
+- ✅ HSTS configuration validation
+- ✅ CSP policy analysis
+- ✅ CORS origin restrictions
+- ✅ Header presence verification
+- ✅ HTTPS enforcement testing
+- ✅ Information disclosure checks
+
+#### Manual Testing Instructions
+
+**Browser DevTools Testing**:
+1. Open Chrome DevTools (F12)
+2. Navigate to Network tab
+3. Refresh the page
+4. Click any request
+5. Check Response Headers section
+6. Verify security headers are present
+
+**Online Security Scanners**:
+- **[securityheaders.com](https://securityheaders.com)**: Comprehensive header analysis
+- **[Mozilla Observatory](https://observatory.mozilla.org)**: Security scoring
+- **[SSL Labs](https://ssllabs.com/ssltest/)**: SSL/TLS configuration testing
+
+### 🚀 Deployment Security
+
+#### Production Configuration
+
+**Environment Variables**:
+```bash
+# Security settings
+NODE_ENV=production
+ALLOWED_ORIGINS=https://eduvexa.vercel.app
+HSTS_MAX_AGE=63072000
+CSP_DEFAULT_SRC="'self'"
+SESSION_SECURE_COOKIES=true
+```
+
+**Security Headers in Production**:
+- **HSTS Preload**: Submit to browser preload lists
+- **CSP Hardening**: Remove `unsafe-inline` in production
+- **Origin Restrictions**: Strict CORS policies
+- **Rate Limiting**: API abuse prevention
+
+#### Vercel Deployment
+
+**Automatic Security**:
+- **HTTPS by Default**: Vercel provides free SSL certificates
+- **HTTP/2 Support**: Modern protocol with security benefits
+- **Edge Caching**: CDN-level protection
+- **DDoS Protection**: Built-in attack mitigation
+
+### 📊 Security Monitoring
+
+#### Real-time Monitoring
+
+**Security Logging**:
+```javascript
+// Middleware logging in development
+if (process.env.NODE_ENV === 'development') {
+  console.log(`[${new Date().toISOString()}] ${request.method} ${request.url}`);
+  console.log('Headers:', Object.fromEntries(request.headers.entries()));
+}
+```
+
+**Production Monitoring**:
+- **Security Headers Logging**: Track header violations
+- **CORS Violation Alerts**: Monitor unauthorized access attempts
+- **HTTPS Redirect Tracking**: Ensure HTTPS enforcement
+- **CSP Reports**: Monitor policy violations
+
+### 🛠️ Security Best Practices
+
+#### Implementation Guidelines
+
+1. **Defense in Depth**:
+   - Multiple security layers
+   - Redundant protections
+   - Fail-safe defaults
+
+2. **Least Privilege**:
+   - Minimal CORS origins
+   - Restrictive CSP policies
+   - Limited API access
+
+3. **Configuration Management**:
+   - Environment-specific settings
+   - Secure credential storage
+   - Regular security audits
+
+#### Common Security Mistakes
+
+❌ **Insecure Configurations**:
+- `Access-Control-Allow-Origin: *` in production
+- Missing HSTS header
+- CSP with `unsafe-inline` in production
+- Exposed server information
+
+✅ **Secure Alternatives**:
+- Specific origin whitelisting
+- HSTS with preload
+- Strict CSP policies
+- Information hiding
+
+### 🔧 Development vs Production
+
+#### Development Environment
+```javascript
+// Relaxed settings for development
+allowedOrigins: ['http://localhost:3000']
+CSP: "script-src 'self' 'unsafe-inline'"
+HSTS: Disabled (localhost)
+```
+
+#### Production Environment
+```javascript
+// Strict security settings
+allowedOrigins: ['https://eduvexa.vercel.app']
+CSP: "script-src 'self' https://trusted-cdn.com"
+HSTS: "max-age=63072000; includeSubDomains; preload"
+```
+
+### 📈 Security Performance Impact
+
+#### Header Overhead
+- **Minimal Impact**: Headers add ~1-2KB to responses
+- **Caching Benefits**: Browser caching reduces repeated checks
+- **CDN Optimization**: Edge caching handles header distribution
+
+#### Performance Benefits
+- **HTTPS Optimization**: HTTP/2 with multiplexing
+- **CSP Caching**: Browser caches policy decisions
+- **HSTS Caching**: Reduced HTTPS negotiation overhead
+
+### 🎯 Security Score Analysis
+
+#### Grading System
+- **A+ (95-100%)**: Excellent security configuration
+- **A (90-94%)**: Strong security with minor improvements
+- **B (80-89%)**: Good security with notable gaps
+- **C (70-79%)**: Basic security needs improvement
+- **D (60-69%)**: Significant security issues
+- **F (0-59%)**: Critical security vulnerabilities
+
+#### Improvement Path
+1. **Critical Issues**: Fix all failing tests
+2. **Security Warnings**: Address configuration gaps
+3. **Best Practices**: Implement advanced protections
+4. **Monitoring**: Set up security alerting
+
+### 🔮 Future Security Enhancements
+
+#### Planned Improvements
+1. **Advanced CSP**: Nonce-based CSP policies
+2. **Rate Limiting**: API abuse prevention
+3. **Security Scanning**: Automated vulnerability detection
+4. **Certificate Monitoring**: SSL/TLS certificate management
+5. **Security Headers**: Additional protective headers
+
+#### Emerging Technologies
+- **HTTP/3**: Next-generation protocol security
+- **WebAssembly**: Secure code execution
+- **Service Workers**: Enhanced security controls
+- **Privacy Sandbox**: Future privacy protections
+
+### 📚 Security Resources
+
+#### Documentation
+- **[MDN Web Security](https://developer.mozilla.org/en-US/docs/Web/Security)**: Comprehensive security guide
+- **[OWASP Top 10](https://owasp.org/www-project-top-ten/)**: Common web vulnerabilities
+- **[CSP Evaluator](https://csp-evaluator.withgoogle.com/)**: CSP policy analysis
+
+#### Tools & Services
+- **[Security Headers](https://securityheaders.com)**: Header testing
+- **[SSL Labs](https://ssllabs.com/ssltest/)**: SSL/TLS testing
+- **[Observatory](https://observatory.mozilla.org)**: Security scoring
+
+### 💡 Security Reflections
+
+#### Implementation Insights
+
+**HTTPS Enforcement**:
+- HSTS provides automatic HTTPS redirection
+- Browser preload lists ensure long-term protection
+- Mixed content prevention maintains security integrity
+
+**CSP Implementation**:
+- Balances security with functionality requirements
+- Prevents XSS while allowing necessary third-party resources
+- Requires careful testing to avoid breaking functionality
+
+**CORS Configuration**:
+- Origin whitelisting prevents unauthorized API access
+- Environment-specific configurations ensure flexibility
+- Proper preflight handling prevents CORS errors
+
+#### Security vs Flexibility
+
+**Trade-offs Considered**:
+- **Strict CSP vs Third-party Integrations**: Balanced approach with trusted sources
+- **CORS Restrictions vs Development**: Environment-specific policies
+- **Security Headers vs Performance**: Minimal overhead for significant protection
+
+**Production Readiness**:
+- Comprehensive header coverage
+- Environment-specific configurations
+- Automated testing and monitoring
+- Clear documentation and maintenance procedures
+
+This implementation provides enterprise-grade security while maintaining developer productivity and user experience. The multi-layered approach ensures protection against common web vulnerabilities while following modern security best practices.
 
 ### JWT Structure Understanding
 

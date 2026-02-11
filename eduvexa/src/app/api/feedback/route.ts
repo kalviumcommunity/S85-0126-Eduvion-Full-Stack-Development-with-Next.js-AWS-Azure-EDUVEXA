@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const user = await getUserFromRequest(req);
     
     if (!user) {
-      logger.logApiError('POST', '/api/feedback', requestId, 'Not authenticated', { userId: user?.id });
+      logger.logApiError('POST', '/api/feedback', requestId, 'Not authenticated');
       return NextResponse.json(
         { success: false, error: "Not authenticated" },
         { status: 401 }
