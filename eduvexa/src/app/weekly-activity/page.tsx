@@ -2,18 +2,24 @@
 
 import { Card } from "@/components";
 import { WeeklyActivityDashboard } from "./WeeklyActivityDashboard";
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+
+// Mock functions for demonstration
+const fetchUsers = async () => {
+  // Mock implementation - replace with actual API call
+  return [];
+};
+
+const fetchWeeklyActivity = async () => {
+  // Mock implementation - replace with actual API call  
+  return [];
+};
 
 export default function WeeklyActivityPage() {
-  const [teamMembers, setTeamMembers] = useState([]);
-  const [activities, setActivities] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
   useEffect(() => {
     const loadTeamMembers = async () => {
       try {
-        const members = await fetchUsers();
-        setTeamMembers(members);
+        await fetchUsers();
       } catch (error) {
         console.error('Failed to load team members:', error);
       }
@@ -21,19 +27,17 @@ export default function WeeklyActivityPage() {
 
     const loadActivities = async () => {
       try {
-        const activityData = await fetchWeeklyActivity();
-        setActivities(activityData);
+        await fetchWeeklyActivity();
       } catch (error) {
         console.error('Failed to load activities:', error);
       }
     };
 
     const loadData = async () => {
-      setIsLoading(true);
       try {
         await Promise.all([loadTeamMembers(), loadActivities()]);
-      } finally {
-        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to load data:', error);
       }
     };
 
