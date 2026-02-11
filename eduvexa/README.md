@@ -20,6 +20,47 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## CI/CD Pipeline
+
+This project includes a comprehensive GitHub Actions CI/CD pipeline located in `.github/workflows/ci.yml`.
+
+### Pipeline Overview
+
+The automated pipeline ensures code quality, testing, and reliable deployment:
+
+**Stages:**
+1. **Lint** - Code quality and style checks using ESLint
+2. **Test** - Unit tests with Jest and coverage reporting
+3. **Security** - Vulnerability scanning with npm audit
+4. **Build** - Next.js production build
+5. **Deploy** - Automated deployment to production
+
+### Workflow Triggers
+
+- **Push**: Triggers on commits to `main` and `develop` branches
+- **Pull Request**: Triggers on PRs to `main` and `develop` branches
+- **Manual**: Optional manual trigger for testing
+
+### Pipeline Features
+
+- **Matrix Testing**: Tests on multiple Node.js versions (18.x, 20.x)
+- **Caching**: npm dependency caching for faster builds
+- **Concurrency**: Prevents overlapping runs on same branch
+- **Code Coverage**: Integration with Codecov for coverage tracking
+- **Security Scanning**: Automated vulnerability detection
+- **E2E Testing**: Playwright/Cypress integration support
+
+### Pipeline Status
+
+View the pipeline status and execution details in:
+**GitHub Repository → Actions Tab**
+
+### Deployment
+
+Deployments to production happen automatically when:
+1. Code is pushed to `main` branch
+2. All pipeline stages pass successfully
+3. Security audit shows no critical vulnerabilities
 
 ## Error & Loading States Implementation
 
