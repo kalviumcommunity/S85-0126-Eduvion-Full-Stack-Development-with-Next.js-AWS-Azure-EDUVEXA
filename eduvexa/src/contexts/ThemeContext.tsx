@@ -20,15 +20,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setIsMounted(true);
   }, []);
 
-  // Check for saved theme (support both keys for compatibility)
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('theme') || localStorage.getItem('eduvexa-theme')) as Theme;
+    if (!isMounted) return;
+
+    const savedTheme = typeof window !== 'undefined' 
+      ? (localStorage.getItem('theme') || localStorage.getItem('eduvexa-theme')) as Theme 
+      : undefined;
+    
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       setTheme(savedTheme);
     } else if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setTheme('dark');
     }
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
     if (!isMounted) return;
