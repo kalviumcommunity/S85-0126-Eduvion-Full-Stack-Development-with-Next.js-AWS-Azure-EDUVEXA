@@ -61,10 +61,27 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate token
-    const token = generateToken(user);
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name
+    });
+    
+    // Create response with cookie
+    const response = NextResponse.json({
+      success: true,
+      message: "Login successful",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
     
     // Set auth cookie
-    setAuthCookie(token);
+    setAuthCookie(response, token);
 
     // Log successful login
     logger.logAuthEvent('login_success', user.id.toString(), requestId, { 
@@ -100,19 +117,10 @@ export async function POST(req: NextRequest) {
       role: user.role
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Login successful",
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    return response;
   } catch (error) {
     const responseTime = logger.getResponseTime(startTime);
-    logger.logApiError('POST', '/api/auth/login', requestId, error, { responseTime });
+    logger.logApiError('POST', '/api/auth/login', requestId, error as Error, { responseTime });
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
