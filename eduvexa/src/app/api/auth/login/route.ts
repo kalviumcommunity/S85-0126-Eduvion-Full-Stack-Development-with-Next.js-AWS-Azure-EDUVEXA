@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
       metadata: {
         email,
         loginTime: new Date().toISOString(),
-      },
+      }
     });
     
     await prisma.activityLog.create({
