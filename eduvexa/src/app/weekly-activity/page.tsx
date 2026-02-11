@@ -2,8 +2,48 @@
 
 import { Card } from "@/components";
 import { WeeklyActivityDashboard } from "./WeeklyActivityDashboard";
+import { useEffect } from 'react';
+
+// Mock functions for demonstration
+const fetchUsers = async () => {
+  // Mock implementation - replace with actual API call
+  return [];
+};
+
+const fetchWeeklyActivity = async () => {
+  // Mock implementation - replace with actual API call  
+  return [];
+};
 
 export default function WeeklyActivityPage() {
+  useEffect(() => {
+    const loadTeamMembers = async () => {
+      try {
+        await fetchUsers();
+      } catch (error) {
+        console.error('Failed to load team members:', error);
+      }
+    };
+
+    const loadActivities = async () => { 
+      try {
+        await fetchWeeklyActivity();
+      } catch (error) {
+        console.error('Failed to load activities:', error);
+      }
+    };
+
+    const loadData = async () => {
+      try {
+        await Promise.all([loadTeamMembers(), loadActivities()]);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+
+    loadData();
+  }, [fetchUsers, fetchWeeklyActivity]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-200 to-blue-400 flex flex-col items-center py-12">
       <div className="w-full max-w-6xl">
@@ -19,7 +59,7 @@ export default function WeeklyActivityPage() {
             <div className="transition-transform hover:scale-[1.03]">
               <h2 className="text-xl font-bold text-cyan-700 mb-3 flex items-center gap-2">
                 <svg className="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m4 0v-4a2 2 0 012-2h2a2 2 0 012 2v4" /></svg>
-                fetchProjects, fetchUsers2
+                fetchProjects, fetchUsers
               </h2>
               <div className="rounded-xl bg-gradient-to-br from-cyan-50 to-blue-100 shadow-lg p-4 animate-fade-in">
                 <WeeklyActivityDashboard />
