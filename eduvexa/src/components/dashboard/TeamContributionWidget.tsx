@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, PieChart, TrendingUp } from 'lucide-react';
+import { Users, PieChart } from 'lucide-react';
 import ProfessionalCard from '@/components/ui/ProfessionalCard';
 
 interface TeamMember {
@@ -14,12 +14,10 @@ interface TeamMember {
 
 interface TeamContributionWidgetProps {
   teamMembers: TeamMember[];
-  totalContributions: number;
 }
 
 export default function TeamContributionWidget({
-  teamMembers,
-  totalContributions
+  teamMembers
 }: TeamContributionWidgetProps) {
   const getContributionColor = (contribution: number) => {
     if (contribution >= 30) return 'bg-success-500';
@@ -56,7 +54,7 @@ export default function TeamContributionWidget({
 
         {/* Contribution Bars */}
         <div className="space-y-3">
-          {teamMembers.map((member, index) => (
+          {teamMembers.map((member) => (
             <div key={member.id} className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

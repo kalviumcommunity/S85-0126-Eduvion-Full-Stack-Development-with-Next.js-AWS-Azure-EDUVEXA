@@ -127,7 +127,8 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     const responseTime = logger.getResponseTime(startTime);
-    logger.logApiError('POST', '/api/feedback', requestId, error, { responseTime });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.logApiError('POST', '/api/feedback', requestId, errorMessage, { responseTime });
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -245,7 +246,8 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     const responseTime = logger.getResponseTime(startTime);
-    logger.logApiError('GET', '/api/feedback', requestId, error, { responseTime });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.logApiError('GET', '/api/feedback', requestId, errorMessage, { responseTime });
     
     return NextResponse.json(
       { success: false, error: "Internal server error" },

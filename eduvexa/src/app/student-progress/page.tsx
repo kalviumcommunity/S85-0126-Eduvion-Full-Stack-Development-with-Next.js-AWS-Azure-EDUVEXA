@@ -191,7 +191,7 @@ export default function StudentProgressPage() {
                     <h3 className="font-semibold text-gray-900 dark:text-white">{student.name}</h3>
                     <Badge 
                       label={`${student.overallProgress}%`} 
-                      variant={student.overallProgress >= 80 ? 'success' : student.overallProgress >= 60 ? 'warning' : 'danger'}
+                      variant={student.overallProgress >= 80 ? 'success' : student.overallProgress >= 60 ? 'warning' : 'error'}
                       size="sm"
                     />
                   </div>

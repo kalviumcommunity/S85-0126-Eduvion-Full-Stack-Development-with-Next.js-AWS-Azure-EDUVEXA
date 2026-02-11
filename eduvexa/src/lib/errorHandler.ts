@@ -4,10 +4,7 @@ import { logger } from "./logger";
 export function handleError(error: any, context: string) {
   const isProd = process.env.NODE_ENV === "production";
 
-  logger.error(`Error in ${context}`, {
-    message: error?.message,
-    stack: isProd ? "REDACTED" : error?.stack,
-  });
+  logger.error(`Error in ${context}`, error instanceof Error ? error : String(error));
 
   return NextResponse.json(
     {

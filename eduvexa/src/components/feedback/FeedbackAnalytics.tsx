@@ -28,12 +28,10 @@ interface FeedbackAnalytics {
 
 interface FeedbackAnalyticsProps {
   analytics: FeedbackAnalytics;
-  timeRange: 'week' | 'month' | 'semester';
 }
 
 export default function FeedbackAnalytics({
-  analytics,
-  timeRange
+  analytics
 }: FeedbackAnalyticsProps) {
   const getTrendIcon = (trend: number) => {
     if (trend > 0) return <TrendingUp className="w-4 h-4 text-success-600" />;
