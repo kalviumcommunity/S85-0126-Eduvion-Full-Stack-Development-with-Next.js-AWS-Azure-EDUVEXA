@@ -82,7 +82,7 @@ export default function ProfessionalSidebar() {
   const navItems = isLoggedIn
     ? NAV_ITEMS
     : [
-        { id: "home", label: "Home", icon: <Home className="w-5 h-5" />, href: "/" },
+        { id: "home", label: "Home", icon: <Home className="w-5 h-5" />, href: "/", description: undefined },
       ];
 
   return (

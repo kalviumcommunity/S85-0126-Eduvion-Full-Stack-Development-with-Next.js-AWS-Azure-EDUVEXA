@@ -15,7 +15,6 @@ interface FeedbackCategory {
 
 interface StructuredFeedbackFormProps {
   recipientName: string;
-  recipientId: string;
   onSubmit: (feedback: {
     categories: FeedbackCategory[];
     overallRating: number;
@@ -54,7 +53,6 @@ const defaultCategories: Omit<FeedbackCategory, 'rating' | 'comment'>[] = [
 
 export default function StructuredFeedbackForm({
   recipientName,
-  recipientId,
   onSubmit
 }: StructuredFeedbackFormProps) {
   const [categories, setCategories] = useState<FeedbackCategory[]>(
@@ -64,7 +62,6 @@ export default function StructuredFeedbackForm({
       comment: ''
     }))
   );
-  const [overallRating, setOverallRating] = useState(0);
   const [anonymous, setAnonymous] = useState(false);
   const [generalComment, setGeneralComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

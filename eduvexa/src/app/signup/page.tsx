@@ -1,11 +1,9 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import CleanCard from "@/components/ui/CleanCard";
 import FormInput from "@/components/ui/FormInput";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
@@ -51,10 +49,6 @@ export default function SignupPage() {
       setError("root", { message: result.error });
     }
   };
-
-  // Password visibility toggle state
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
   return (
     // <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e0e7ff] via-[#f3e8ff] to-[#c7d2fe] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-2">
