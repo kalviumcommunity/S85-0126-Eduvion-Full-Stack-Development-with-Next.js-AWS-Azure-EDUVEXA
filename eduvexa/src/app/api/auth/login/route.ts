@@ -51,9 +51,7 @@ export async function POST(req: NextRequest) {
     const isPasswordValid = await verifyPassword(password, user.password);
     
     if (!isPasswordValid) {
-      logger.logAuthError('login', 'Invalid credentials - wrong password', user.id.toString(), requestId, { 
-        email 
-      });
+      logger.logAuthError('login', 'Invalid credentials - wrong password', user.id.toString(), requestId);
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
         { status: 401 }
