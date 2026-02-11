@@ -25,7 +25,7 @@ export default function WeeklyActivityPage() {
       }
     };
 
-    const loadActivities = async () => {
+    const loadActivities = async () => { 
       try {
         await fetchWeeklyActivity();
       } catch (error) {
