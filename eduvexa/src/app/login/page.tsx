@@ -88,7 +88,7 @@ export default function LoginPage() {
                 className="flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-2xl bg-white/90 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition font-bold text-gray-800 dark:text-gray-100 text-base group min-w-0 backdrop-blur-sm"
                 // onClick={handleGoogleLogin}
               >
-                <span className="bg-white rounded-full p-1 border border-gray-200 group-hover:scale-110 transition"><Image src="/google.svg" alt="Google" width={22} height={22} /></span>
+                <span className="bg-white rounded-full p-1 border border-gray-200 group-hover:scale-110 transition"><img src="/google.svg" alt="Google" width={22} height={22} /></span>
                 <span className="ml-1 truncate">Google</span>
               </button>
               <button
@@ -96,7 +96,7 @@ export default function LoginPage() {
                 className="flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-2xl bg-gradient-to-r from-[#1877F3] to-[#145db2] hover:from-[#145db2] hover:to-[#1877F3] transition font-bold text-white text-base shadow-xl min-w-0 backdrop-blur-sm"
                 // onClick={handleFacebookLogin}
               >
-                <span className="bg-white rounded-full p-1"><Image src="/facebook.svg" alt="Facebook" width={22} height={22} /></span>
+                <span className="bg-white rounded-full p-1"><img src="/facebook.svg" alt="Facebook" width={22} height={22} /></span>
                 <span className="ml-1 truncate">Facebook</span>
               </button>
             </div>
