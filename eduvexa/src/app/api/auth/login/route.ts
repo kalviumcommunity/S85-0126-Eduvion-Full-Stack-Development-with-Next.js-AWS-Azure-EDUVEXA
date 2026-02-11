@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
     // Log successful login
     logger.logAuthEvent('login_success', user.id.toString(), requestId, { 
       email,
-      role: user.role 
+      role: user.role,
     });
 
     // Log activity

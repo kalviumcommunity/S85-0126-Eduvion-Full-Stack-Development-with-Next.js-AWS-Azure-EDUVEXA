@@ -18,8 +18,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setIsMounted(true);
+  }, []);
 
-    // Check for saved theme (support both keys for compatibility)
+  // Check for saved theme (support both keys for compatibility)
+  useEffect(() => {
     const savedTheme = (localStorage.getItem('theme') || localStorage.getItem('eduvexa-theme')) as Theme;
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       setTheme(savedTheme);
