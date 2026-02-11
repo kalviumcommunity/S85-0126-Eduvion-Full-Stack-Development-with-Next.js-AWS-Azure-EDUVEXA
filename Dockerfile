@@ -1,3 +1,27 @@
+# Stage 1: Build
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Install dependencies (use npm ci for reproducible installs)
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy source and build
+COPY . .
+RUN npm run build
+
+# Stage 2: Run
+FROM node:18-alpine
+WORKDIR /app
+
+# Copy built app from builder
+COPY --from=builder /app .
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+# Start the Next.js production server
+CMD ["npm", "start"]
 # Use official Node.js image
 FROM node:20-alpine
 

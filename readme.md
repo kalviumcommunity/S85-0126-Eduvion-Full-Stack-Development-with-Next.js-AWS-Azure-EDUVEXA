@@ -27,10 +27,16 @@ EDUVEXA is a modern, full-stack educational collaboration platform designed to i
    cp .env.example .env.local
    ```
    
-   Configure your database URL in `.env.local`:
+   Configure your database URL and AWS S3 credentials in `.env.local`:
    ```bash
-   DATABASE_URL="postgresql://username:password@localhost:5432/eduvexa"
+   DATABASE_URL="postgresql://username:password@localhost:5432/mydb"
    JWT_SECRET="your-secret-key-here"
+   
+   # AWS S3 Configuration (for file uploads)
+   AWS_ACCESS_KEY_ID="your-access-key"
+   AWS_SECRET_ACCESS_KEY="your-secret-key"
+   AWS_REGION="ap-south-1"
+   AWS_BUCKET_NAME="your-bucket-name"
    ```
 
 4. **Set up the database**
@@ -49,6 +55,167 @@ EDUVEXA is a modern, full-stack educational collaboration platform designed to i
    ```bash
    npm run dev
    ```
+
+## 🧪 Testing
+
+EDUVEXA includes a comprehensive testing setup using Jest and React Testing Library.
+
+### Testing Setup
+
+- **Jest**: Test runner with coverage reporting
+- **React Testing Library**: Component testing utilities
+- **User Event**: Advanced user interaction simulation
+- **TypeScript**: Full TypeScript support
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run specific test file
+npm test __tests__/utils.test.ts
+```
+
+### Test Structure
+
+```
+__tests__/
+├── utils.test.ts          # Utility function tests
+├── Button.test.tsx        # Component tests
+└── ProfessionalSidebar.test.tsx  # Complex component tests
+```
+
+### Coverage Configuration
+
+The test suite is configured with coverage thresholds:
+- **Statements**: 80%
+- **Branches**: 80%
+- **Functions**: 80%
+- **Lines**: 80%
+
+Coverage reports are generated in the `coverage/` directory.
+
+### Sample Test Output
+
+```
+ PASS  __tests__/utils.test.ts
+  Utility Functions
+    sum
+      ✓ should add two positive numbers correctly (3 ms)
+      ✓ should handle negative numbers
+      ✓ should handle zero
+      ✓ should handle decimal numbers
+    isValidEmail
+      ✓ should validate correct email addresses (4 ms)
+      ✓ should reject invalid email addresses
+      ✓ should reject emails with spaces (1 ms)
+    capitalize
+      ✓ should capitalize first letter of a string (3 ms)
+      ✓ should handle empty string (1 ms)
+      ✓ should handle single character (1 ms)
+      ✓ should handle strings with spaces
+
+Test Suites: 1 passed, 1 total
+Tests:       11 passed, 11 total
+```
+
+### CI/CD Integration
+
+The project includes automated testing through GitHub Actions:
+
+- **Unit Tests**: Run on every push and pull request
+- **Coverage Reports**: Automatically uploaded to Codecov
+- **Security Audits**: Automated vulnerability scanning
+- **Multi-node Testing**: Tests run on Node.js 18.x and 20.x
+
+### Writing Tests
+
+#### Utility Function Example
+```typescript
+// src/utils/helpers.ts
+export const sum = (a: number, b: number): number => a + b;
+
+// __tests__/utils.test.ts
+import { sum } from '../src/utils/helpers';
+
+test('adds two numbers', () => {
+  expect(sum(2, 3)).toBe(5);
+});
+```
+
+#### Component Example
+```typescript
+// __tests__/Button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import Button from '../src/components/ui/Button';
+
+test('renders button and responds to click', async () => {
+  const handleClick = jest.fn();
+  render(<Button label="Click Me" onClick={handleClick} />);
+  
+  const button = screen.getByRole('button', { name: 'Click Me' });
+  await userEvent.click(button);
+  
+  expect(handleClick).toHaveBeenCalledTimes(1);
+});
+```
+
+### Best Practices
+
+1. **Test Behavior, Not Implementation**: Focus on what users see and do
+2. **Use Meaningful Assertions**: Test user-visible outcomes
+3. **Mock External Dependencies**: Isolate components from external services
+4. **Maintain High Coverage**: Aim for 80%+ coverage across all metrics
+5. **Write Descriptive Tests**: Clear test names that explain the behavior
+
+### Testing Pyramid
+
+```
+    /\
+   /  \  E2E Tests (Cypress/Playwright)
+  /____\
+ /      \ Integration Tests
+/________\
+Unit Tests (Jest + RTL) - Fast, Isolated, Comprehensive
+```
+
+- **Unit Tests**: Fast, isolated tests for individual functions/components
+- **Integration Tests**: Test how modules work together
+- **E2E Tests**: Full user workflows in a real browser
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Jest DOM Matchers Not Found**
+   ```bash
+   npm install --save-dev @testing-library/jest-dom
+   ```
+
+2. **Module Resolution Errors**
+   - Check `jest.config.js` `moduleNameMapper` configuration
+   - Ensure TypeScript paths are properly mapped
+
+3. **Coverage Threshold Failures**
+   - Write more tests for uncovered code
+   - Adjust thresholds in `jest.config.js` if necessary
+
+#### Debugging Tests
+
+```bash
+# Run tests with debugger
+node --inspect-brk node_modules/.bin/jest --runInBand
+
+# Run specific test in debug mode
+node --inspect-brk node_modules/.bin/jest __tests__/utils.test.ts --runInBand
+```
 
 6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
@@ -69,7 +236,8 @@ After seeding the database, you can use these test accounts:
 - **🤝 Peer Feedback System** - Structured reviews with ratings and comments
 - **👥 Team Management** - User profiles, search, and statistics
 - **🚀 Project Management** - Task tracking with progress visualization
-- **🔐 Secure Authentication** - JWT-based auth with role-based access control
+- **� Secure File Uploads** - Direct S3 uploads with pre-signed URLs, no credential exposure
+- **�🔐 Secure Authentication** - JWT-based auth with role-based access control
 - **🎨 Modern UI/UX** - Dark mode, responsive design, and smooth animations
 
 ## �️ Tech Stack
@@ -88,6 +256,9 @@ EDUVEXA/
 │   ├── src/
 │   │   ├── app/               # App Router pages
 │   │   │   ├── api/          # API routes
+   │   │   │   ├── upload/   # File upload pre-signed URL generation
+   │   │   │   ├── files/    # File metadata storage & retrieval
+   │   │   │   ├── auth/     # Authentication
 │   │   │   ├── dashboard/    # Dashboard page
 │   │   │   ├── profile/      # Profile page
 │   │   │   ├── users/        # Team members page
@@ -113,10 +284,36 @@ By working on EDUVEXA, developers gain hands-on experience with:
 - TypeScript for type safety
 - Prisma ORM for database operations
 - JWT authentication and security best practices
+- Secure file uploads with AWS S3 pre-signed URLs
 - Modern React patterns (Context, Hooks, Forms)
 - Responsive design with Tailwind CSS
 - Database design and relationships
 - API development with Next.js API routes
+
+## 📤 File Upload System
+
+EDUVEXA includes a secure file upload system using AWS S3 pre-signed URLs:
+
+**Features:**
+- Direct client-to-S3 uploads (no server overhead)
+- Temporary signed URLs (60-second expiry)
+- File type and size validation
+- Database tracking with metadata
+- Support for project-based file organization
+- Lifecycle policies for automatic cleanup
+
+**Quick Setup:**
+1. Create AWS S3 bucket and IAM credentials
+2. Set environment variables (see above)
+3. Use `<FileUpload />` component in your pages
+
+**Documentation:**
+For detailed setup, API endpoints, testing, and security best practices, see [FILE_UPLOAD_API_GUIDE.md](FILE_UPLOAD_API_GUIDE.md)
+
+**API Endpoints:**
+- `POST /api/upload` - Generate pre-signed URL
+- `POST /api/files` - Store file metadata
+- `GET /api/files` - Retrieve files with filtering
 
 ---
 
