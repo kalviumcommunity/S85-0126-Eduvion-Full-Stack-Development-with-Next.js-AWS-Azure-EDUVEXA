@@ -224,7 +224,7 @@ export async function GET(req: NextRequest) {
     });
 
     const totalFeedback = feedback.length;
-    const averageRating = stats.reduce((sum, stat) => sum + (stat.rating * stat._count.id), 0) / totalFeedback || 0;
+    const averageRating = stats.reduce((sum: number, stat) => sum + (stat.rating * stat._count.id), 0) / totalFeedback || 0;
 
     const responseTime = logger.getResponseTime(startTime);
     logger.logApiSuccess('GET', '/api/feedback', requestId, responseTime, {
