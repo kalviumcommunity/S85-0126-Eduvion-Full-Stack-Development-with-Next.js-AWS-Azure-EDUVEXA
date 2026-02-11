@@ -29,7 +29,7 @@ EDUVEXA is a modern, full-stack educational collaboration platform designed to i
    
    Configure your database URL and AWS S3 credentials in `.env.local`:
    ```bash
-   DATABASE_URL="postgresql://username:password@localhost:5432/eduvexa"
+   DATABASE_URL="postgresql://username:password@localhost:5432/mydb"
    JWT_SECRET="your-secret-key-here"
    
    # AWS S3 Configuration (for file uploads)
