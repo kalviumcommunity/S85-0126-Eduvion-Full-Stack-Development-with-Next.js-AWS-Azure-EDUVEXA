@@ -10,7 +10,6 @@ export function useScrollDirection() {
 
   useEffect(() => {
     setIsMounted(true);
-    lastScrollY.current = window.scrollY;
   }, []);
 
   useEffect(() => {
